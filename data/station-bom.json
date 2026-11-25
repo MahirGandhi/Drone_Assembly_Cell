@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "product_id": "x500-v2-frame-reference",
+  "revision": "A",
+  "station_output": "frame assembly accepted against modeled station checks",
+  "items": [
+    {
+      "id": "lower-prepared",
+      "quantity": 1,
+      "unit": "assembly",
+      "incoming": "prepared upstream",
+      "includes": [
+        "bottom plate 510180",
+        "rail/board supports",
+        "PDB mounting",
+        "power-module routing",
+        "reference landing gear where required"
+      ],
+      "source": [
+        "HB-FRAME-GUIDE",
+        "PX4-X500-6C"
+      ],
+      "geometry_status": "S1 verification pending"
+    },
+    {
+      "id": "arm-fl",
+      "quantity": 1,
+      "unit": "module",
+      "incoming": "motor/ESC arm complete",
+      "position": "front-left",
+      "source": [
+        "HB-KIT"
+      ],
+      "identity_status": "position mapping to actual labels pending"
+    },
+    {
+      "id": "arm-fr",
+      "quantity": 1,
+      "unit": "module",
+      "incoming": "motor/ESC arm complete",
+      "position": "front-right",
+      "source": [
+        "HB-KIT"
+      ],
+      "identity_status": "position mapping to actual labels pending"
+    },
+    {
+      "id": "arm-rl",
+      "quantity": 1,
+      "unit": "module",
+      "incoming": "motor/ESC arm complete",
+      "position": "rear-left",
+      "source": [
+        "HB-KIT"
+      ],
+      "identity_status": "position mapping to actual labels pending"
+    },
+    {
+      "id": "arm-rr",
+      "quantity": 1,
+      "unit": "module",
+      "incoming": "motor/ESC arm complete",
+      "position": "rear-right",
+      "source": [
+        "HB-KIT"
+      ],
+      "identity_status": "position mapping to actual labels pending"
+    },
+    {
+      "id": "upper-plate",
+      "part_number": "510179",
+      "quantity": 1,
+      "unit": "part",
+      "incoming": "finished",
+      "source": [
+        "HB-FRAME-GUIDE"
+      ]
+    },
+    {
+      "id": "frame-screw",
+      "quantity": 16,
+      "unit": "part",
+      "incoming": "indexed presentation",
+      "specification": "M3x38 socket-cap reference",
+      "source": [
+        "HB-FRAME-GUIDE"
+      ],
+      "geometry_status": "drive/head/thread engagement to verify"
+    },
+    {
+      "id": "frame-nut",
+      "quantity": 16,
+      "unit": "part",
+      "incoming": "operator loaded in fixture retention",
+      "specification": "M3 flange locknut reference",
+      "source": [
+        "HB-FRAME-GUIDE"
+      ],
+      "geometry_status": "flange/locking feature/anti-rotation interface to verify"
+    }
+  ],
+  "not_consumed_per_product": [
+    "robot",
+    "gripper",
+    "screwdriver",
+    "fixture",
+    "trays",
+    "sensors",
+    "reusable carrier"
+  ],
+  "upstream_not_double_counted": [
+    "motors",
+    "ESCs",
+    "arm internal fasteners",
+    "PDB fasteners",
+    "rail fasteners",
+    "gear fasteners"
+  ],
+  "replacement_policy": "Every removed screw/nut is accounted for; replacement consumes additional stock and gets a new joint attempt."
+}

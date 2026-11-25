@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-25",
+  "sources": [
+    {
+      "id": "HB-KIT",
+      "url": "https://holybro.com/products/px4-development-kit-x500-v2",
+      "kind": "manufacturer",
+      "revision_status": "live listing; exact product geometry revision not frozen",
+      "facts": [
+        "X500 V2 kit uses preassembled motor/ESC arms.",
+        "Pixhawk 6C/M10/915 MHz variant is listed as SKU 30189; this controller bundle is context, not required output of this station."
+      ],
+      "limits": [
+        "No released automation drawing, joint recipe or process timing."
+      ]
+    },
+    {
+      "id": "HB-FRAME-GUIDE",
+      "url": "https://cdn.shopifycdn.net/s/files/1/0604/5905/7341/files/X500_V2_Assembly_Guide_en.pdf?v=1720853913",
+      "kind": "manufacturer assembly drawing",
+      "revision_status": "versioned URL; physical part revision unconfirmed",
+      "facts": [
+        "Main frame assembly references 16 M3x38 socket screws and 16 M3 flange locknuts.",
+        "Top plate 510179, bottom plate 510180, and arm structural items are identified."
+      ],
+      "limits": [
+        "Fastener direction, dimensions, drive details and access need CAD/physical review.",
+        "No fastening torque or strength acceptance values are specified."
+      ]
+    },
+    {
+      "id": "PX4-X500-6C",
+      "url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c",
+      "kind": "official build guide",
+      "revision_status": "main branch; controller/GPS examples may differ from present kit",
+      "facts": [
+        "Reference route installs lower supports/PDB and gear before arms and upper plate.",
+        "Guide advises routing wires before closing the upper plate."
+      ],
+      "limits": [
+        "Manual assembly route is not a demonstrated robot process.",
+        "Old battery/GPS examples do not override current component specifications."
+      ]
+    },
+    {
+      "id": "NVIDIA-SIMREADY",
+      "url": "https://huggingface.co/datasets/nvidia/simready-assets",
+      "kind": "manufacturer asset dataset",
+      "revision_status": "individual asset commit must be pinned before use",
+      "facts": [
+        "Dataset lists USD assets under CC BY 4.0."
+      ],
+      "limits": [
+        "Only selected station environment assets will be downloaded.",
+        "Dataset membership alone does not prove suitability for our fixture, product or robot."
+      ]
+    },
+    {
+      "id": "SELF-REFINE",
+      "url": "https://arxiv.org/abs/2303.17651",
+      "kind": "primary research paper",
+      "revision_status": "v2",
+      "facts": [
+        "Iterative initial output, feedback and refinement is a documented approach."
+      ],
+      "limits": [
+        "Project uses separate scoped reviewers plus evidence checks; paper is not proof that any reviewer conclusion is correct."
+      ]
+    }
+  ]
+}

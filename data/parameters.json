@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "parameters": [
+    {
+      "id": "arm_count",
+      "value": 4,
+      "unit": "module",
+      "evidence_status": "source-fact",
+      "source": "HB-KIT",
+      "resolution_task": "S0.3",
+      "impact": "identity/consumption"
+    },
+    {
+      "id": "frame_joint_count",
+      "value": 16,
+      "unit": "joint",
+      "evidence_status": "source-fact",
+      "source": "HB-FRAME-GUIDE",
+      "resolution_task": "S0.3",
+      "impact": "required result count"
+    },
+    {
+      "id": "frame_screw_nominal_diameter",
+      "value": 3,
+      "unit": "mm",
+      "evidence_status": "source-fact",
+      "source": "HB-FRAME-GUIDE",
+      "resolution_task": "S1.2",
+      "impact": "nominal designation only, not actual geometry"
+    },
+    {
+      "id": "frame_screw_nominal_length",
+      "value": 38,
+      "unit": "mm",
+      "evidence_status": "source-fact",
+      "source": "HB-FRAME-GUIDE",
+      "resolution_task": "S1.2",
+      "impact": "feeding/clearance"
+    },
+    {
+      "id": "product_revision",
+      "value": null,
+      "unit": "identifier",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.1",
+      "impact": "consistent geometry"
+    },
+    {
+      "id": "prepared_lower_envelope",
+      "value": null,
+      "unit": "mm",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.3",
+      "impact": "fixture/loading"
+    },
+    {
+      "id": "arm_mass",
+      "value": null,
+      "unit": "kg",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.6",
+      "impact": "gripper/robot payload"
+    },
+    {
+      "id": "frame_mass",
+      "value": null,
+      "unit": "kg",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.6",
+      "impact": "unload payload"
+    },
+    {
+      "id": "arm_centre_of_gravity",
+      "value": null,
+      "unit": "mm",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.6",
+      "impact": "grasp/inertia"
+    },
+    {
+      "id": "nut_envelope",
+      "value": null,
+      "unit": "mm",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.2",
+      "impact": "anti-rotation fixture"
+    },
+    {
+      "id": "screw_head_and_drive",
+      "value": null,
+      "unit": "mm",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.2",
+      "impact": "bit/nosepiece"
+    },
+    {
+      "id": "joint_locations",
+      "value": null,
+      "unit": "mm",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.2",
+      "impact": "robot approaches"
+    },
+    {
+      "id": "joint_torque",
+      "value": null,
+      "unit": "N m",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.5",
+      "impact": "unqualified physical joint"
+    },
+    {
+      "id": "joint_angle_limits",
+      "value": null,
+      "unit": "degree",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.5",
+      "impact": "unqualified process"
+    },
+    {
+      "id": "grip_force",
+      "value": null,
+      "unit": "N",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.6",
+      "impact": "part retention"
+    },
+    {
+      "id": "robot_joint_limits",
+      "value": null,
+      "unit": "rad",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S1.6",
+      "impact": "kinematics"
+    },
+    {
+      "id": "normal_operation_times",
+      "value": null,
+      "unit": "s",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S7.1",
+      "impact": "capacity"
+    },
+    {
+      "id": "cable_service_time",
+      "value": null,
+      "unit": "s",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S7.1",
+      "impact": "operator contention"
+    },
+    {
+      "id": "replenishment_times",
+      "value": null,
+      "unit": "s",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S7.1",
+      "impact": "starvation"
+    },
+    {
+      "id": "fault_occurrence",
+      "value": null,
+      "unit": "event model",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S7.6",
+      "impact": "scenario uncertainty"
+    },
+    {
+      "id": "rework_policy_times",
+      "value": null,
+      "unit": "s",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S6.3",
+      "impact": "WIP/capacity"
+    },
+    {
+      "id": "shift_length",
+      "value": null,
+      "unit": "s",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S7.1",
+      "impact": "user scenario"
+    },
+    {
+      "id": "simready_asset_commit",
+      "value": null,
+      "unit": "commit",
+      "evidence_status": "unknown",
+      "source": null,
+      "resolution_task": "S3.1",
+      "impact": "asset reproducibility"
+    }
+  ],
+  "rule": "null is unknown, never zero; synthetic demonstration inputs require separate scenario provenance"
+}

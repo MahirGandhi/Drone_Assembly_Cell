@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "revision": "A",
+  "definition": "Accepted against modeled frame-station checks only; no proof of structural joint strength or airworthiness.",
+  "checks": [
+    {
+      "id": "Q01",
+      "characteristic": "correct product/recipe/part identity",
+      "planned_method": "identified incoming kit and recipe match",
+      "coverage": "identity evidence, not inferred material authenticity"
+    },
+    {
+      "id": "Q02",
+      "characteristic": "four arms and plates seated",
+      "planned_method": "fixture seating checks with explicit feedback",
+      "coverage": "detector capability and actual geometry to establish in S1/S3"
+    },
+    {
+      "id": "Q03",
+      "characteristic": "required cable connections/routing",
+      "planned_method": "operator completion and defined routing inspection before closure",
+      "coverage": "manual confirmation can be wrong; no perfect automatic detection presumed"
+    },
+    {
+      "id": "Q04",
+      "characteristic": "nut loading/retention",
+      "planned_method": "operator preparation check and monitored joint behavior",
+      "coverage": "automatic nut presence sensing pending feasibility"
+    },
+    {
+      "id": "Q05",
+      "characteristic": "each required joint accepted",
+      "planned_method": "unique assembly/joint/attempt/recipe-linked result",
+      "coverage": "synthetic driver result exercises logic; does not validate clamp load"
+    },
+    {
+      "id": "Q06",
+      "characteristic": "complete final station evidence",
+      "planned_method": "required checks and unique accepted joint set reconciled",
+      "coverage": "inspection valid/no-result/failure states distinct"
+    },
+    {
+      "id": "Q07",
+      "characteristic": "supported unload to clear output",
+      "planned_method": "grip/support and transfer feedback",
+      "coverage": "must be backed by later grasp/extraction evidence"
+    }
+  ],
+  "dispositions": {
+    "accepted": "All required evidence valid for this assembly and recipe, no unresolved fault, unloading confirmed; counted once.",
+    "held": "Unresolved failure or missing/invalid evidence; remains identified and supported WIP.",
+    "reworked": "Approved intervention and replacement recorded; every affected requirement rechecked; history preserved.",
+    "scrapped": "Explicit disposition; material and WIP adjusted once; cannot be reset into accepted."
+  },
+  "joint_control": {
+    "required_unique_joint_ids": [
+      "J01",
+      "J02",
+      "J03",
+      "J04",
+      "J05",
+      "J06",
+      "J07",
+      "J08",
+      "J09",
+      "J10",
+      "J11",
+      "J12",
+      "J13",
+      "J14",
+      "J15",
+      "J16"
+    ],
+    "torque_Nm": null,
+    "angle_limits_deg": null,
+    "depth_limits_mm": null,
+    "recipe_status": "unqualified; source/CAD/joint study pending",
+    "policy": "No generic M3 torque. Locknut rundown resistance and early torque must be distinguished from final tightening; modeled outputs must be labeled."
+  }
+}

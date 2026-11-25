@@ -1,0 +1,403 @@
+[
+  {
+    "id": "S0.1",
+    "work": "Register the exact X500 V2 source documents and reference revisions; distinguish old build examples from the chosen geometry.",
+    "expected_evidence": "Source register with URL, revision/date where available, access status and the specific fact supported. No mixed revisions hidden in the BOM.",
+    "status": "done",
+    "evidence": [
+      "docs/sources/register.json"
+    ]
+  },
+  {
+    "id": "S0.2",
+    "work": "Define the station boundary, incoming product state and downstream assembly needs. Resolve whether the lower plate arrives with PDB/wiring or other inaccessible items fitted.",
+    "expected_evidence": "One-page input/output contract; every operation belongs to upstream work, this cell or downstream work.",
+    "status": "done",
+    "evidence": [
+      "docs/engineering/station-contract.md"
+    ]
+  },
+  {
+    "id": "S0.3",
+    "work": "Produce the station BOM and operation-level consumption list, including fastener quantities and supplier arm modules.",
+    "expected_evidence": "BOM with quantities, identities and status; one frame's required materials reconcile with its operations.",
+    "status": "done",
+    "evidence": [
+      "data/station-bom.json"
+    ]
+  },
+  {
+    "id": "S0.4",
+    "work": "Write the manual reference assembly route and precedence constraints using the existing guide; note access and wire-management requirements.",
+    "expected_evidence": "Ordered operation list and annotated assembly images; no robot assumptions yet.",
+    "status": "done",
+    "evidence": [
+      "docs/engineering/process-route.md"
+    ],
+    "note": "Source/CAD annotated views are explicitly deferred to S1; no verified geometry claimed."
+  },
+  {
+    "id": "S0.5",
+    "work": "Define accepted, held, reworked and scrapped product conditions, plus inspection coverage.",
+    "expected_evidence": "Product-quality requirements mapped to observable checks; unsupported physical performance is excluded from the pass claim.",
+    "status": "done",
+    "evidence": [
+      "data/quality-plan.json"
+    ]
+  },
+  {
+    "id": "S0.6",
+    "work": "Register engineering inputs: dimensions, mass, centre of gravity, thread/drive geometry, tightening recipe, operation times and replenishment. Mark each sourced, measured, CAD-derived or assumed.",
+    "expected_evidence": "Parameter register with units, provenance, range/status and impact. Unknowns cannot masquerade as manufacturer data.",
+    "status": "done",
+    "evidence": [
+      "data/parameters.json"
+    ]
+  },
+  {
+    "id": "S0.7",
+    "work": "Convert requirements to verification cases and prioritize feasibility risks.",
+    "expected_evidence": "Requirements-to-test matrix and risk register; every project claim has a proposed evidence path.",
+    "status": "done",
+    "evidence": [
+      "data/acceptance-matrix.json",
+      "docs/engineering/risks.md"
+    ]
+  },
+  {
+    "id": "S1.1",
+    "work": "Obtain and inspect existing CAD first. Check scale, units, revision, component separation, missing items and permitted reuse. Create simplified geometry only for a documented gap.",
+    "expected_evidence": "CAD inventory and reference-dimension checks; every proxy is labeled and excluded from unsupported clearance claims.",
+    "status": "todo"
+  },
+  {
+    "id": "S1.2",
+    "work": "Define part datums, arm identities, assembly poses and a joint table for all frame screws/nuts. Establish the insertion side, head access and nut envelope.",
+    "expected_evidence": "Labeled product drawing and joint map; each fastener has one physical location and its actual mating parts.",
+    "status": "todo"
+  },
+  {
+    "id": "S1.3",
+    "work": "Perform the assembly/access study: ordering, wire parking, part insertion, top-plate closure, downstream access and extraction.",
+    "expected_evidence": "Section views and a feasible sequence; access conflicts resolved before motion design.",
+    "status": "todo"
+  },
+  {
+    "id": "S1.4",
+    "work": "Design the fixture: location, support, anti-rotation nut pockets, nut loading/checking, clamps and release. Address loose nuts and cable traps explicitly.",
+    "expected_evidence": "Fixture concept with loading/clamping/unloading states and clearance evidence; neither floating nuts nor blocked extraction.",
+    "status": "todo"
+  },
+  {
+    "id": "S1.5",
+    "work": "Compare existing screwdriving/feeding options against the exact joint. Start with indexed screw presentation; verify length, head, bit, retention, axial travel and nose clearance. Define provisional joint-control stages.",
+    "expected_evidence": "Tool compatibility matrix and fastening concept; screw-size advertising is not used as complete proof. No unsourced final torque.",
+    "status": "todo"
+  },
+  {
+    "id": "S1.6",
+    "work": "Select a candidate robot/tool arrangement from documented models. Verify payload including tooling, centre of gravity/inertia, grasp surfaces, reach, orientation and tool-change needs. Lay out operator/service access.",
+    "expected_evidence": "Candidate layout, robot/tool specification references, grasp list and reach/access evidence; choice remains rejectable if geometry fails.",
+    "status": "todo"
+  },
+  {
+    "id": "S1.7",
+    "work": "Review the complete mechanical concept against product requirements and failure/recovery needs.",
+    "expected_evidence": "Design-review checklist with resolved blockers. If automation is infeasible, document the smallest justified boundary/tool change instead of hiding it.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.1",
+    "work": "Create the approved repository and milestone/issue structure. Configure one-active-task workflow, reproducible local commands, automated checks and a minimal Vercel preview.",
+    "expected_evidence": "A clean checkout can run/build the minimal app; repository and deployment visibility follow the approved scope.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.2",
+    "work": "Define typed schemas for product, station, operation, joint, tool, sensor, material, run and result. Centralize units and coordinate conventions.",
+    "expected_evidence": "Versioned schemas and sample configuration; invalid/missing values are rejected with useful errors.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.3",
+    "work": "Implement the deterministic simulation clock, event queue and station state machine independently of rendering.",
+    "expected_evidence": "The same input and seed produces the same ordered results; pause/step/accelerate do not change process outcomes.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.4",
+    "work": "Implement device commands, permission checks, completion feedback and timeouts. Track robot, fixture, tools and operator as resources.",
+    "expected_evidence": "State-transition tests show no action completing solely because its command was sent.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.5",
+    "work": "Implement product/part ownership and event records. A part belongs to exactly one tray, gripper, fixture or output location.",
+    "expected_evidence": "Material and ownership invariants hold; event export identifies the active assembly and recipe.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.6",
+    "work": "Add essential verification: no negative inventory, duplicate joint acceptance, overlapping single-robot tasks or successful unload without a supported product.",
+    "expected_evidence": "Focused engine tests pass; invalid sequences are rejected and logged.",
+    "status": "todo"
+  },
+  {
+    "id": "S2.7",
+    "work": "Provide a plain engineering interface for mode, start, stop, reset, step and state/event inspection.",
+    "expected_evidence": "A reviewer can execute a simple cycle and understand why a command is permitted or blocked.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.1",
+    "work": "Import approved geometry and establish world, robot-base, tool, fixture, tray and part coordinate frames. Keep source CAD separate from optimized display meshes.",
+    "expected_evidence": "Scaled scene plus transform checks; rendering simplification does not change engineering datum positions.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.2",
+    "work": "Implement explicit operator loading and unloading permissions, durations and completion events.",
+    "expected_evidence": "Operator actions consume time/resources; loading while automatic access is prohibited cannot succeed.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.3",
+    "work": "Implement fixture seating, clamps and retained-nut state with separate command/feedback.",
+    "expected_evidence": "Missing/misseated parts or absent clamp confirmation prevent fastening. Fixture release preserves support requirements.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.4",
+    "work": "Implement known-position trays, nut/screw presentation, inventory and replenishment.",
+    "expected_evidence": "Every consumption/replenishment reconciles with stock; empty positions produce waiting or a defined fault.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.5",
+    "work": "Implement the screwdriver's device interface and approach/engagement concept without assuming a valid joint result.",
+    "expected_evidence": "Device states and provisional recipes are visible; result signals remain separate from the rendered tool movement.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.6",
+    "work": "Implement accepted output, held-product location and capacity-limited unload.",
+    "expected_evidence": "A full output location blocks release/transfer appropriately; a held product cannot enter accepted stock.",
+    "status": "todo"
+  },
+  {
+    "id": "S3.7",
+    "work": "Demonstrate the operator-loaded baseline and review its work sequence and event history.",
+    "expected_evidence": "One reference frame flows through the modeled work; manual and automatic work are clearly separated.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.1",
+    "work": "Encode the approved joint list, fastening sequence and recipe revision. Associate every joint with its required screw/nut and fixture support.",
+    "expected_evidence": "Joint table matches the assembly; missing/duplicated positions cannot satisfy completion.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.2",
+    "work": "Implement screwdriver acquisition/docking and tool-lock/identity checks, with the physical access envelope established in S1.",
+    "expected_evidence": "Robot cannot drive with the wrong/unlocked tool; docking and tool changes consume explicit time.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.3",
+    "work": "Implement screw acquisition from indexed presentation and travel to the joint. Resolve long-screw retention/clearance and motor-wire proximity.",
+    "expected_evidence": "Screw ownership is preserved; absent screw, failed pick or obstructed path is handled explicitly.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.4",
+    "work": "Model engagement, rundown and final tightening as distinct operations. Represent nut locking resistance and suspicious early torque/insufficient engagement as testable cases.",
+    "expected_evidence": "Joint-result model distinguishes success from commanded torque. Synthetic signatures are labeled, not presented as measured tool curves.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.5",
+    "work": "Record each attempt's joint ID, recipe, reported torque/angle/depth where supported, status and failure reason. Separate instrument availability from desired data.",
+    "expected_evidence": "One joint's result cannot be applied to another assembly, location or recipe. Unsupported sensing is not fabricated.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.6",
+    "work": "Verify faults: missing nut, wrong screw, cross-thread-like engagement, spinning nut, tool timeout and incomplete sequence. Define their observable signatures/coverage.",
+    "expected_evidence": "Detected faults hold the cycle; undetectable conditions are recorded as coverage gaps rather than magically found.",
+    "status": "todo"
+  },
+  {
+    "id": "S4.7",
+    "work": "Demonstrate complete fastening and compare modeled time with its operation breakdown and source status.",
+    "expected_evidence": "Every required joint has the proper accepted record; total process time equals accounted actions and waits.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.1",
+    "work": "Implement the selected robot's joint model, limits, tool transforms, payload metadata and motion constraints. Use existing documented models first.",
+    "expected_evidence": "Joint-limited poses and paths are reproducible; a Cartesian animation without a valid robot configuration is not marked verified.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.2",
+    "work": "Implement the approved grasp and release model for lower plate, each arm, upper plate and completed assembly. Account for fingers, cables, motors and product support.",
+    "expected_evidence": "Each grasp has an approach, grip confirmation, transport, seating and release condition; held parts move with the tool.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.3",
+    "work": "Implement lower-plate and four-arm placement with identity checks and wire parking. Preserve the actual insertion order from the mechanical study.",
+    "expected_evidence": "Wrong arm/orientation and failed seating prevent subsequent closure; no hidden teleporting or preassembled replacement mesh.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.4",
+    "work": "Implement top-plate placement, fixture clamping and handoff to fastening. Tool changes must fit the actual single-robot sequence.",
+    "expected_evidence": "Fixture holds the assembly independently before the robot releases it or changes tools; clamps leave every fastening path accessible.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.5",
+    "work": "Verify joint paths and collision clearance throughout approach, insertion, travel and tool changes, including held product, tool and cables' defined envelopes.",
+    "expected_evidence": "Path review covers the moving envelope, not just endpoints; uncertain flexible-cable/contact behavior remains labeled.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.6",
+    "work": "Implement supported extraction and unload after accepted inspection. Verify nut-pocket release and grip access on the assembled product.",
+    "expected_evidence": "No fixture trapping, part loss or unload into occupied space; output transfer is recorded once.",
+    "status": "todo"
+  },
+  {
+    "id": "S5.7",
+    "work": "Demonstrate the integrated normal automatic cycle and identify remaining manual tasks.",
+    "expected_evidence": "One assembly traverses all operations with consistent material, ownership, timing, joint and result records.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.1",
+    "work": "Implement mode/access permissions, stop, emergency-stop representation, acknowledgement and deliberate restart behavior. Define retained state for each interruption point.",
+    "expected_evidence": "Closing access or acknowledging an alarm cannot silently resume motion. Product and joint history survive interruption.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.2",
+    "work": "Implement the fault catalogue below with explicit causes, observations, detection coverage, stop response and recovery prerequisites.",
+    "expected_evidence": "Every fault has a reproducible scenario and an observable explanation; random failure alone is not a recovery design.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.3",
+    "work": "Implement held/rework/scrap disposition, failed-joint attempt history and controlled return to the proper sequence point.",
+    "expected_evidence": "No unconditional retighten-until-pass behavior; intervention/replacement policy is recorded and counted.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.4",
+    "work": "Implement the inspection/control plan: incoming identity, seating, clamp state, fastening record completeness and final defined-feature inspection.",
+    "expected_evidence": "Each quality requirement is linked to a detector or manual check and its coverage limit. False accept/reject scenarios can be represented.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.5",
+    "work": "Implement operator servicing: tray refill, screw/nut refill, bit/tool checks, calibration-due condition and fault intervention.",
+    "expected_evidence": "Service actions consume operator availability, travel/service time and material. A single operator cannot service two cells simultaneously.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.6",
+    "work": "Verify information integrity: duplicate start, delayed/stale tool result, duplicate completion, wrong recipe and run reset during partial assembly.",
+    "expected_evidence": "The cell does not double-count parts or accept a product with mismatched/stale evidence.",
+    "status": "todo"
+  },
+  {
+    "id": "S6.7",
+    "work": "Run the normal, fault and recovery demonstrations and review all dispositions and downtime attribution.",
+    "expected_evidence": "Failure cases either recover through their approved route or remain held; time and material are conserved.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.1",
+    "work": "Define available shift time, breaks, planned service, replenishment, arrivals, output removal and timing provenance. Separate operator work, robot work, tool work and waits.",
+    "expected_evidence": "Transparent time budget and baseline operation-time breakdown; neither frame rate nor animation playback speed determines capacity.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.2",
+    "work": "Implement exact good/held/scrapped counts, first-pass yield, completed-cycle time, WIP, operator/robot utilization and categorized downtime.",
+    "expected_evidence": "Metrics reconcile against event records and conservation equations; denominator definitions are visible.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.3",
+    "work": "Model repeated cycles, finite trays and shared operator service, including starvation, blocked output and changeovers where actually included.",
+    "expected_evidence": "Capacity changes for explainable resource reasons; adding a robot does not automatically create free staffing or replenishment.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.4",
+    "work": "Define a bounded configuration catalogue: duplicate approved cell layouts, permitted operator counts and physical/service-space constraints. Keep product geometry fixed.",
+    "expected_evidence": "Every candidate references the approved cell; invalid layouts or insufficient resources are rejected before evaluation.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.5",
+    "work": "Accept required good frames per shift and evaluate candidates. Use minimum cell count, then minimum operator count as the initial explicit ranking; use cost only if defensible cost inputs are supplied.",
+    "expected_evidence": "Results show candidates, shortfalls and limiting reasons. No unsupported claim of a globally optimal factory or minimum actual cost.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.6",
+    "work": "Compare nominal and uncertain runs using a small fixed seed bank, the same seed set across candidates and a recorded compute cap. Expand runs only if needed to resolve an important difference.",
+    "expected_evidence": "Export sample size, distribution assumptions, sample outputs and ranking stability. A sample success rate is not labeled a guarantee or statistical confidence without the relevant analysis.",
+    "status": "todo"
+  },
+  {
+    "id": "S7.7",
+    "work": "Demonstrate a low-demand and higher-demand configuration plus an infeasible request. Explain how resources, waiting and good output change.",
+    "expected_evidence": "Input changes cause a documented configuration decision; impossible requests produce a shortfall and limiting constraints rather than a fabricated solution.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.1",
+    "work": "Execute the virtual factory acceptance matrix below against pinned product, recipe, code and scenario versions. Resolve failed checks in order.",
+    "expected_evidence": "Test evidence with expected/observed outcomes and explicit unresolved limitations.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.2",
+    "work": "Verify the model by independent hand checks: material balance, joint counts, deterministic cycle time, waiting cases and simple bottleneck bounds. Compare with physical or documented observations when obtainable.",
+    "expected_evidence": "Explainable calculations and comparisons. Distinguish model verification from validation against a physical station.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.3",
+    "work": "Complete an appropriately scoped sensitivity study for the main uncertain inputs: handling time, fastening/service time, refill frequency, faults and rework.",
+    "expected_evidence": "Identify which uncertainties materially change capacity conclusions; avoid claiming precision unsupported by inputs.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.4",
+    "work": "Finish the engineering HMI: inspect state, follow an assembly, view joint results, inject approved faults, acknowledge/recover, compare demand cases and export runs.",
+    "expected_evidence": "Clear normal/held/fault states and readable units; a walkthrough is possible without developer knowledge.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.5",
+    "work": "Check web usability, asset rights, reproducible builds, capped worker runs, import validation and target-browser performance.",
+    "expected_evidence": "A clean build and representative browser run pass; exact browser/hardware and remaining performance limits are recorded.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.6",
+    "work": "Prepare the final Git/Vercel release, source/model manifest, engineering summary, short demonstration and portfolio case study. Keep visibility/promotion within the user's authorization.",
+    "expected_evidence": "Release candidate ties deployed source to a commit and includes setup instructions and downloadable evidence.",
+    "status": "todo"
+  },
+  {
+    "id": "S8.7",
+    "work": "Review the project against its original goals, show normal/fault/demand scenarios and record final known limitations and follow-on backlog.",
+    "expected_evidence": "A reviewer can reproduce the evidence and understand which behaviors are modeled, assumed, geometrically checked or physically validated.",
+    "status": "todo"
+  }
+]
