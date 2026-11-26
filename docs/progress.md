@@ -2,7 +2,7 @@
 
 Repository: MahirGandhi/Drone_Assembly_Cell. User authorized execution on 2026-11-25.
 
-Current sprint: S1. Current task: S1.1 CAD/source asset inspection. Work in progress: one.
+Current sprint: S1. Current task: S1.2 supplier arm identity and joint geometry. Work in progress: one.
 
 S0.1–S0.7 artifacts are written. Source/CAD image annotations and mechanical feasibility remain explicitly assigned to S1; no geometry validation is claimed. The S0 gate passed independent review; see docs/reviews/S0.md.
 
@@ -12,6 +12,10 @@ S0.1–S0.7 artifacts are written. Source/CAD image annotations and mechanical f
 - Station contract including modeled operator cable service before frame closure.
 - BOM and precedence-aware route.
 - Quality/disposition definition, parameter register, risk register and 20 acceptance cases.
+
+## S1 geometry baseline
+
+The manufacturer STEP imported in FreeCAD. See docs/engineering/reference-geometry.md for nominal plate dimensions and 16 matched joint axes. Current motor and wiring geometry still needs verification.
 
 ## Feedback loop
 

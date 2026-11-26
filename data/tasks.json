@@ -68,13 +68,25 @@
     "id": "S1.1",
     "work": "Obtain and inspect existing CAD first. Check scale, units, revision, component separation, missing items and permitted reuse. Create simplified geometry only for a documented gap.",
     "expected_evidence": "CAD inventory and reference-dimension checks; every proxy is labeled and excluded from unsupported clearance claims.",
-    "status": "todo"
+    "status": "done",
+    "evidence": [
+      "docs/engineering/reference-geometry.md",
+      "data/reference-geometry.json",
+      "scripts/inspect_x500.py"
+    ],
+    "note": "Nominal CAD baseline. Current supplier geometry and arm identity mapping remain open."
   },
   {
     "id": "S1.2",
     "work": "Define part datums, arm identities, assembly poses and a joint table for all frame screws/nuts. Establish the insertion side, head access and nut envelope.",
     "expected_evidence": "Labeled product drawing and joint map; each fastener has one physical location and its actual mating parts.",
-    "status": "todo"
+    "status": "in-progress",
+    "evidence": [
+      "docs/engineering/reference-geometry.md",
+      "data/reference-geometry.json",
+      "scripts/inspect_x500.py"
+    ],
+    "note": "Sixteen central screw/nut center positions extracted. Still verify supplier-arm mapping, mating geometry and fastening access."
   },
   {
     "id": "S1.3",
