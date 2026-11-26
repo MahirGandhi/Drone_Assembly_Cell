@@ -5,6 +5,7 @@ A virtual automated X500-reference drone frame assembly cell, focused on fixturi
 The station produces an assembled frame, not a flight-ready drone. Manufacturing evidence and modeled behavior are tracked separately.
 
 - [Sprint plan](docs/sprint-plan.md)
+- [Exploded view and line experiment sprints](docs/exploded-view-sprints.md)
 - [Execution status](docs/progress.md)
 - [Engineering definition](docs/engineering/station-contract.md)
 - [Source register](docs/sources/register.json)
@@ -23,4 +24,6 @@ npm test
 npm run dev
 ```
 
-Use **Top** for the overhead view, **Isometric** for the full cell, or **Fixture** for fastening detail. [Prototype coverage and engineering limits](docs/engineering/virtual-prototype.md).
+Start in **Product & line**. Select a component from the model or bill of materials, inspect its route, then run an experiment with two assembly cells. **Find configuration** searches up to four cells and four operators against the entered shift target. The default scenario uses assumed inputs and starts with an empty line.
+
+Open **Cell simulator** for the existing fastening demo. Use **Top** for the overhead view, **Isometric** for the full cell or **Fixture** for fastening detail. [Prototype coverage and engineering limits](docs/engineering/virtual-prototype.md).

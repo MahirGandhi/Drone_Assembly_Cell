@@ -2,15 +2,36 @@ import './style.css';
 import {Cell,faults} from './cell.js';
 import {createView} from './scene.js';
 import {compare} from './capacity.js';
+import {initExplorer} from './explorer.js';
 
 const byId=id=>document.getElementById(id);
+let showingCell = false;
+const explorer = initExplorer(() => setWorkspace(true));
+byId('open-explorer').onclick = () => setWorkspace(false);
+byId('open-cell').onclick = () => setWorkspace(true);
+
+function setWorkspace(showCell) {
+  if (showCell === showingCell) return;
+  showingCell = showCell;
+  byId('cell-workspace').hidden = !showCell;
+  byId('explorer').hidden = showCell;
+  byId('open-cell').setAttribute('aria-pressed',String(showCell));
+  byId('open-explorer').setAttribute('aria-pressed',String(!showCell));
+  explorer.setVisible(!showCell);
+  if (showCell && view === undefined) {
+    try { view = createView(byId('scene')); }
+    catch (error) {
+      console.error(error);
+      view = null;
+      byId('scene').textContent = '3D rendering requires WebGL. Cycle controls and shift planning are available.';
+    }
+  }
+  window.scrollTo(0,0);
+  byId(showCell ? 'open-cell' : 'open-explorer').focus({preventScroll:true});
+}
+
 for(const [key,[label]] of Object.entries(faults)) byId('fault').add(new Option(label,key));
 let view;
-try {view=createView(byId('scene'));}
-catch(error) {
-  console.error(error);
-  byId('scene').textContent='3D rendering requires WebGL. Cycle controls and shift planning are available.';
-}
 let cell;
 let last=-1;
 let rendered=0;
@@ -106,7 +127,7 @@ function frame(now) {
   const dt=last<0?0:Math.min(.12,(now-last)/1000);
   last=now;
   cell.tick(dt*Number(byId('speed').value));
-  view?.animate(cell);
+  if (showingCell) view?.animate(cell);
   if(now-lastRefresh>=100 || rendered!==cell.history.length) {
     refresh();
     lastRefresh=now;

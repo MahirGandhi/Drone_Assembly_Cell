@@ -1,9 +1,62 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>X500 Assembly Cell</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Drone Assembly Lab</title></head>
 <body>
-<header><div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div><span class="context">Nominal geometry · Modeled cycle</span></header>
-<main>
+<header class="app-header">
+<div class="brand"><span class="logo" aria-hidden="true">✣</span><strong>Drone Assembly Lab</strong></div>
+<nav aria-label="Workspace"><button id="open-explorer" aria-pressed="true">Product &amp; line</button><button id="open-cell" aria-pressed="false">Cell simulator</button></nav>
+</header>
+<main id="explorer" class="explorer">
+<section class="product-region" aria-labelledby="product-title">
+  <div class="product-header"><div><h1 id="product-title">Exploded frame</h1><p>X500 V2-inspired concept</p></div><span id="part-tag"></span></div>
+  <div class="product-viewport">
+    <div id="product-scene"></div>
+    <div class="product-views"><button id="product-iso" aria-pressed="true">Isometric</button><button id="product-top" aria-pressed="false">Top</button></div>
+    <p class="orbit-hint">Drag to orbit · Scroll to zoom · Select a part</p>
+  </div>
+  <div class="explosion-controls">
+    <label for="explosion">Explode <output id="explosion-value" for="explosion">80%</output></label>
+    <input id="explosion" type="range" min="0" max="100" value="80">
+    <button id="assemble">Assemble</button><button id="explode">Explode fully</button>
+  </div>
+</section>
+<aside class="product-bom" aria-labelledby="bom-title">
+  <div class="product-header"><div><h2 id="bom-title">Bill of materials</h2><p>Selectable component groups</p></div></div>
+  <div id="component-list" class="component-list" aria-label="Component groups"></div>
+  <div class="component-detail" aria-live="polite"><h3 id="part-name"></h3><p id="part-detail"></p></div>
+</aside>
+<section class="manufacturing-route" aria-labelledby="route-title">
+  <div class="lab-heading"><div><h2 id="route-title">Frame assembly route</h2><p id="trace" aria-live="polite"></p></div><button id="trace-cell">Open cell simulator</button></div>
+  <ol id="route"></ol>
+  <p class="route-disposition">Pass: accepted output. First-pass reject: rework, recheck, then accepted output.</p>
+</section>
+<section class="line-workspace" aria-labelledby="line-title">
+  <div class="lab-heading"><div><h2 id="line-title">Line experiments</h2><p>Compare a scenario with the baseline, or find staffing that meets a shift target.</p></div><button id="capture-baseline">Use result as baseline</button></div>
+  <div class="line-layout">
+    <form id="line-form" class="line-form">
+      <div class="line-fields" id="line-fields"></div>
+      <div class="line-actions">
+        <button class="primary" type="submit" value="run">Run scenario</button>
+        <button type="submit" value="plan">Find configuration</button>
+      </div>
+    </form>
+    <div class="line-report">
+      <div id="line-metrics" class="line-metrics" aria-live="polite"></div>
+      <div class="constraint" id="line-constraint"></div>
+      <div id="line-plan" aria-live="polite"></div>
+      <div class="line-table-scroll" tabindex="0" role="region" aria-label="Station results">
+        <table class="line-table">
+          <thead><tr><th scope="col">Station</th><th scope="col">Busy</th><th scope="col">Avg. queue (Δ)</th><th scope="col">Peak queue</th><th scope="col">Staff wait</th><th scope="col">Blocked</th></tr></thead>
+          <tbody id="line-stations"></tbody>
+        </table>
+      </div>
+      <p class="line-accounting" id="line-accounting"></p>
+      <details class="line-assumptions"><summary>Simulation assumptions</summary><p>Each shift starts empty. A scheduled release is skipped when the kitting queue is full. Queue deltas compare against the baseline. The nominal capacity limit ranks the assumed load per frame and ideal stage capacity. The run accounts for queue blocking, contention and the shift boundary. Queues count waiting frames and have the same capacity at every stage. Kitting, prep, manual cell operations and rework share operators. Outgoing inspection has a dedicated modeled resource. Rework includes a second check and returns accepted frames to output. Queue and output estimates depend on assumed times and reject rates.</p></details>
+    </div>
+  </div>
+</section>
+</main>
+<main id="cell-workspace" hidden>
 <section class="view" aria-label="3D assembly cell">
 <div id="scene"></div>
 <div class="overlay"><div><small>CAMERA</small><strong id="camera-label">Overhead</strong></div><div class="view-buttons"><button id="top" aria-pressed="true">Top</button><button id="iso" aria-pressed="false">Isometric</button><button id="focus" aria-pressed="false">Fixture</button></div></div>
