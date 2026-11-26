@@ -1,0 +1,144 @@
+{
+  "source_sha256": "e7ccd422cf7825b61ad8270a98d8fbbbc12aced102cc6a20ed17ee66b816c360",
+  "plate_closure_samples": [
+    {
+      "offset_above_final_mm": 50,
+      "hits": []
+    },
+    {
+      "offset_above_final_mm": 25,
+      "hits": []
+    },
+    {
+      "offset_above_final_mm": 10,
+      "hits": []
+    },
+    {
+      "offset_above_final_mm": 5,
+      "hits": []
+    },
+    {
+      "offset_above_final_mm": 2,
+      "hits": []
+    },
+    {
+      "offset_above_final_mm": 1,
+      "hits": [
+        {
+          "feature": "Part__Feature037",
+          "label": "HMX5V-JIBI-JIA-MUJU001",
+          "overlap_mm3": 0.092958
+        },
+        {
+          "feature": "Part__Feature064",
+          "label": "HMX5V-JIBI-JIA-MUJU003",
+          "overlap_mm3": 0.092958
+        },
+        {
+          "feature": "Part__Feature091",
+          "label": "HMX5V-JIBI-JIA-MUJU005",
+          "overlap_mm3": 0.092958
+        },
+        {
+          "feature": "Part__Feature118",
+          "label": "HMX5V-JIBI-JIA-MUJU007",
+          "overlap_mm3": 0.092958
+        }
+      ]
+    },
+    {
+      "offset_above_final_mm": 0,
+      "hits": [
+        {
+          "feature": "Part__Feature037",
+          "label": "HMX5V-JIBI-JIA-MUJU001",
+          "overlap_mm3": 0.185916
+        },
+        {
+          "feature": "Part__Feature064",
+          "label": "HMX5V-JIBI-JIA-MUJU003",
+          "overlap_mm3": 0.185916
+        },
+        {
+          "feature": "Part__Feature091",
+          "label": "HMX5V-JIBI-JIA-MUJU005",
+          "overlap_mm3": 0.185916
+        },
+        {
+          "feature": "Part__Feature118",
+          "label": "HMX5V-JIBI-JIA-MUJU007",
+          "overlap_mm3": 0.185916
+        }
+      ]
+    }
+  ],
+  "approach_probe_radius_mm": 5,
+  "approach_probe_length_mm": 50,
+  "approach_samples": [
+    {
+      "joint": "J01",
+      "hits": []
+    },
+    {
+      "joint": "J02",
+      "hits": []
+    },
+    {
+      "joint": "J03",
+      "hits": []
+    },
+    {
+      "joint": "J04",
+      "hits": []
+    },
+    {
+      "joint": "J05",
+      "hits": []
+    },
+    {
+      "joint": "J06",
+      "hits": []
+    },
+    {
+      "joint": "J07",
+      "hits": []
+    },
+    {
+      "joint": "J08",
+      "hits": []
+    },
+    {
+      "joint": "J09",
+      "hits": []
+    },
+    {
+      "joint": "J10",
+      "hits": []
+    },
+    {
+      "joint": "J11",
+      "hits": []
+    },
+    {
+      "joint": "J12",
+      "hits": []
+    },
+    {
+      "joint": "J13",
+      "hits": []
+    },
+    {
+      "joint": "J14",
+      "hits": []
+    },
+    {
+      "joint": "J15",
+      "hits": []
+    },
+    {
+      "joint": "J16",
+      "hits": []
+    }
+  ],
+  "notes": "Nominal STEP. Upper plate and arm solids only. Main frame screws and nuts excluded as obstacles. Discrete not swept closure. Probe is a hypothetical cylinder above the screw envelope, without tool, robot, bit engagement, wiring, clamps, nearby equipment or operator."
+}

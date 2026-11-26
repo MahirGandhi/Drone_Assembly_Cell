@@ -17,6 +17,8 @@ S0.1–S0.7 artifacts are written. Source/CAD image annotations and mechanical f
 
 The manufacturer STEP imported in FreeCAD. See docs/engineering/reference-geometry.md for nominal plate dimensions and 16 matched joint axes. Current motor and wiring geometry still needs verification.
 
+Nominal access screening found a small intersection in each arm near upper-plate seating. All 16 simplified probes above the screws were clear against the included solids. See docs/engineering/reference-access.md for limits and the four unresolved intersections.
+
 ## Feedback loop
 
 Complete -> check -> scoped review -> fix blockers -> targeted recheck. Reviews use artifacts and evidence; they do not replace tests or sources. No broad research or parallel build tasks.

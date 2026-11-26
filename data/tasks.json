@@ -84,7 +84,8 @@
     "evidence": [
       "docs/engineering/reference-geometry.md",
       "data/reference-geometry.json",
-      "scripts/inspect_x500.py"
+      "scripts/inspect_x500.py",
+      "data/reference-access.json"
     ],
     "note": "Sixteen central screw/nut center positions extracted. Still verify supplier-arm mapping, mating geometry and fastening access."
   },
@@ -92,7 +93,13 @@
     "id": "S1.3",
     "work": "Perform the assembly/access study: ordering, wire parking, part insertion, top-plate closure, downstream access and extraction.",
     "expected_evidence": "Section views and a feasible sequence; access conflicts resolved before motion design.",
-    "status": "todo"
+    "status": "todo",
+    "note": "Nominal closure samples and approach probes recorded. Four closure intersections require disposition. Arm insertion, wiring and extraction remain open.",
+    "evidence": [
+      "docs/engineering/reference-access.md",
+      "data/reference-access.json",
+      "docs/reviews/S1-access.md"
+    ]
   },
   {
     "id": "S1.4",
