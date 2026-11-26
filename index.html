@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>X500 Assembly Cell</title></head>
+<body>
+<header><div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div><span class="context">Nominal geometry · Modeled cycle</span></header>
+<main>
+<section class="view" aria-label="3D assembly cell">
+<div id="scene"></div>
+<div class="overlay"><div><small>CAMERA</small><strong id="camera-label">Overhead</strong></div><div class="view-buttons"><button id="top" aria-pressed="true">Top</button><button id="iso" aria-pressed="false">Isometric</button><button id="focus" aria-pressed="false">Fixture</button></div></div>
+<div id="gate" class="gate">Automatic motion available</div>
+<div class="legend"><span><i></i> Cell boundary</span><span><i></i> Joint accepted</span><span><i></i> Joint pending</span></div>
+</section>
+<aside class="panel">
+<div class="section-title"><h1>Cell controls</h1><span id="status" data-state="ready">Ready</span></div>
+<div class="metrics"><div><small>CYCLE TIME</small><strong id="time">0.0 s</strong></div><div><small>JOINTS ACCEPTED</small><strong id="joints">0 / 16</strong></div></div>
+<div class="operation"><small>ACTIVE OPERATION</small><strong id="op">Ready to start</strong><div class="progress"><div id="bar"></div></div></div>
+<div class="actions"><button id="run" class="primary">Start cycle</button><button id="reset">New run</button></div>
+<div class="actions"><button id="estop">Emergency stop</button><button id="ack" disabled>Acknowledge stop</button></div>
+<button id="confirm" class="wide" hidden>Confirm operator work</button><div id="recovery" hidden><p id="reason"></p><button id="access">Open gate</button><button id="recover" disabled>Confirm corrective action</button></div>
+<div class="fields"><label>Handling<select id="mode"><option value="auto">Robot assisted</option><option value="manual">Operator loaded</option></select></label><label>Speed<select id="speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="12">12×</option></select></label></div>
+<label>Scenario<select id="fault"><option value="">Normal cycle</option></select></label>
+<div class="logs"><h2>Event log</h2><ol id="events"><li>Waiting for cycle start.</li></ol></div>
+<button id="export" class="wide">Export run record</button>
+</aside>
+<section class="capacity">
+<div><small>SHIFT PLANNING</small><h2>Capacity comparison</h2><p>Compare simulated good frames by cell count and shared operator availability.</p></div>
+<form id="capacity"><label>Required good frames<input id="target" type="number" min="1" max="2000" value="120" required></label><label>Available minutes<input id="minutes" type="number" min="1" max="720" value="420" required></label><button type="submit">Compare configurations</button></form>
+<div id="capacity-result" aria-live="polite"></div>
+</section>
+</main><script type="module" src="/src/main.js"></script></body></html>

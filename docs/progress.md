@@ -2,7 +2,7 @@
 
 Repository: MahirGandhi/Drone_Assembly_Cell. User authorized execution on 2026-11-25.
 
-Current sprint: S1. Current task: S1.2 supplier arm identity and joint geometry. Work in progress: one.
+A browser prototype covering S0–S8 is implemented. The remaining physical verification tasks stay open. See [prototype coverage](engineering/virtual-prototype.md) and [independent review](reviews/virtual-prototype.md).
 
 S0.1–S0.7 artifacts are written. Source/CAD image annotations and mechanical feasibility remain explicitly assigned to S1; no geometry validation is claimed. The S0 gate passed independent review; see docs/reviews/S0.md.
 
@@ -25,4 +25,4 @@ Complete -> check -> scoped review -> fix blockers -> targeted recheck. Reviews 
 
 ## Remaining limits
 
-No physical validation, qualified torque, measured cycle time or robotic clearance. NVIDIA SimReady selected-asset import is still pending; no whole-library download. S1 must prove nut retention/release, tool/part access and preservation of downstream assembly.
+No physical validation, qualified torque, measured cycle time or robotic clearance. The browser scene uses a converted NVIDIA SimReady crate with source attribution. S1 must prove nut retention/release, tool/part access and preservation of downstream assembly.

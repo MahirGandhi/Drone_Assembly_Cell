@@ -1,0 +1,33 @@
+{
+  "name": "drone_assembly_cell",
+  "version": "1.0.0",
+  "description": "A virtual automated X500-reference drone frame assembly cell, focused on fixturing, robotic handling, controlled fastening, inspection, recovery and production capacity.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node --test",
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MahirGandhi/Drone_Assembly_Cell.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/MahirGandhi/Drone_Assembly_Cell/issues"
+  },
+  "homepage": "https://github.com/MahirGandhi/Drone_Assembly_Cell#readme",
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "vite": "8.4.0"
+  }
+}
