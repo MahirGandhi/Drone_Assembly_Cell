@@ -121,6 +121,10 @@ byId('access').onclick=()=>{
 byId('recover').onclick=()=>{cell.recover();refresh();};
 const cameraNames={top:'Overhead',iso:'Isometric',focus:'Fixture close-up',plan:'Shift layout'};
 function selectCamera(key) {
+  if (key!=='plan') {
+    shiftPlaying=false;
+    byId('shift-play').textContent='Play shift';
+  }
   cameraKey=key;
   if (key!=='plan') liveCamera=key;
   view?.setCamera(key);

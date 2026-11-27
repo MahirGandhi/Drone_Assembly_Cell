@@ -68,19 +68,20 @@ export function simulateShift({cells,operators,seconds,auto,seed,variation,produ
     const repairing=!servicing && route[cell.step].key==='undock' && cell.rework && !cell.repairDone;
     const op=servicing?{resource:'operator',duration:serviceSeconds,key:'service'}:
       repairing?{resource:'operator',duration:production.reworkSeconds,key:'repair'}:route[cell.step];
-    const duration=op.duration*(1+(draw()*2-1)*variation);
     let start=cell.time;
-    const outputOffset=op.key==='unload'?duration:
-      op.outputAt===null||op.outputAt===undefined?null:op.outputAt*duration/op.duration;
-    if (outputOffset!==null && production.pickupInterval>0) {
+    if ((op.key==='unload'||op.outputAt!=null) && production.pickupInterval>0) {
       const lastPickup=Math.floor(start/production.pickupInterval)*production.pickupInterval;
       const occupied=cell.outputs.filter(time=>time>lastPickup).length;
       if (occupied>=production.outputCapacity) {
         const nextPickup=lastPickup+production.pickupInterval;
         waiting(cell,start,nextPickup,'blocked');
-        start=nextPickup;
+        cell.time=Math.min(nextPickup,seconds);
+        continue;
       }
     }
+    const duration=op.duration*(1+(draw()*2-1)*variation);
+    const outputOffset=op.key==='unload'?duration:
+      op.outputAt===null||op.outputAt===undefined?null:op.outputAt*duration/op.duration;
     const resourceReady=start;
     if(op.resource==='operator') {
       const worker=staff.indexOf(Math.min(...staff));
@@ -96,8 +97,8 @@ export function simulateShift({cells,operators,seconds,auto,seed,variation,produ
     if (capture && start<seconds) cell.history.push({start,end:Math.min(end,seconds),kind:op.key,resource:op.resource});
     if (outputOffset!==null && start+outputOffset<=seconds+1e-9) {
       cell.good++;
-      cell.outputs.push(start+outputOffset);
-      cell.acceptedTimes.push(start+outputOffset);
+      cell.outputs.push(Math.min(seconds,start+outputOffset));
+      cell.acceptedTimes.push(Math.min(seconds,start+outputOffset));
     }
     cell.time=Math.min(end,seconds);
     if(end>seconds) continue;

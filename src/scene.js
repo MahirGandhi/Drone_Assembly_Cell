@@ -361,7 +361,7 @@ export function createView(host,onAssetStatus=()=>{}) {
       layout.add(bay);
       const status=cyl(layout,x,1.9,z,.17,.08,green.clone(),16);
       shiftIndicators.push(status);
-      label(`CELL ${index+1} · ${bays[index].good} GOOD`,x,z-2.56,layout);
+      label(`CELL ${index+1} · SHIFT TOTAL ${bays[index].good}`,x,z-2.56,layout);
     }
     // Show the shared staff once, in the access aisle.
     for (let index=0;index<operators;index++) {
@@ -377,9 +377,12 @@ export function createView(host,onAssetStatus=()=>{}) {
       const indicator=shiftIndicators[index];
       if (!indicator) return;
       const waiting=['starved','blocked','staff-wait'].includes(state.status);
-      indicator.material.color.setHex(waiting?0xff725b:state.resource==='operator'?0xf4bd3b:state.status==='idle'?0x52616b:0x9deb62);
+      const color=waiting?0xff725b:state.resource==='operator'?0xf4bd3b:state.status==='idle'?0x52616b:0x9deb62;
+      if (indicator.material.color.getHex()!==color) {
+        indicator.material.color.setHex(color);
+        needsRender=true;
+      }
     });
-    needsRender=true;
   }
 
   const accessBounds=new T.Box3(V(...operatorAccess.min),V(...operatorAccess.max));

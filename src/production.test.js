@@ -42,3 +42,22 @@ test('single-cell shift counts output at the same unload instant as the cell eng
   }
   assert.throws(()=>compare(100,420,true,{outputCapacity:0}),RangeError);
 });
+
+test('blocked output releases staff and timeline records never have negative duration',()=>{
+  for(const variation of [0,.15]) {
+    const run=simulateShift({...config,auto:false,seconds:600,seed:1,variation,
+      production:{outputCapacity:1,pickupInterval:640}});
+    for(const bay of run.bays) {
+      for(const event of bay.history) {
+        assert.ok(event.end>=event.start,event.kind);
+        assert.ok(event.end<=600);
+      }
+    }
+    assert.ok(run.blocked>0);
+  }
+});
+
+test('end-of-shift playback output matches the exact nominal count',()=>{
+  const run=simulateShift({...config,cells:3,seconds:215*60});
+  assert.equal(run.bays.reduce((total,bay)=>total+bay.outputs.filter(time=>time<=215*60).length,0),run.good);
+});
