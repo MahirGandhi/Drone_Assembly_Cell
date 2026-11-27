@@ -20,6 +20,26 @@ for(let index=0;index<positions.length;index++) {
 assert.deepEqual(low,manifest.browser.bounds.min,'Asset minimum bounds changed');
 assert.deepEqual(high,manifest.browser.bounds.max,'Asset maximum bounds changed');
 assert.match(manifest.source.revision,/^[a-f0-9]{40}$/,'Asset revision must be pinned');
-assert.equal(manifest.browser.conversionReproducible,false,'A reproducible converter requires separate evidence');
-assert.equal(manifest.nativeValidation.status,'pending','Native validation requires separate evidence');
+assert.equal(manifest.browser.conversionReproducible,true,'The browser asset requires the recorded converter');
+assert.ok(manifest.browser.sourceEnvelopeErrorMetres<=.002,'Display-envelope error exceeds recorded limit');
+assert.equal(manifest.nativeValidation.status,'cpu-composition-checked','Native inspection report required');
 console.log('Supply crate local digest, topology, bounds and source-revision format verified.');
+
+const report=JSON.parse(await readFile(new URL('../data/native-asset-report.json',import.meta.url),'utf8'));
+assert.equal(report.sourceRevision,manifest.source.revision,'Native report revision differs');
+assert.equal(report.browserExport.sha256,manifest.browser.sha256,'Native report browser digest differs');
+assert.deepEqual(report.unresolvedDependencies,[],'Native dependencies are unresolved');
+assert.equal(report.sourceMetrics.metersPerUnit,1,'Pinned asset metrics changed');
+assert.equal(report.sourceMetrics.upAxis,'Z','Pinned asset orientation changed');
+assert.ok(report.rearAccessGapMetres>.1,'Native rear clearance control failed');
+assert.equal(report.obstructionGapMetres,0,'Native obstruction control failed');
+const native=report.rearWorldBoundsMetres;
+const browserBounds={
+  min:[native.min[0]+2.93,native.min[2],1.12-native.max[1]],
+  max:[native.max[0]+2.93,native.max[2],1.12-native.min[1]],
+};
+for (const key of ['min','max']) for (let axis=0;axis<3;axis++) {
+  assert.ok(Math.abs(browserBounds[key][axis]-manifest.browser.bounds[key][axis])<=.002,
+    'Native-to-browser envelope exceeds 2 mm display tolerance');
+}
+console.log('Native dependency, composition and static-layout evidence matches the browser derivative.');

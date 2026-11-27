@@ -1,0 +1,200 @@
+{
+  "sourceRevision": "dde58cf7c1d74896c2116a6c14a3a851bc5b58a7",
+  "unresolvedDependencies": [],
+  "resolvedLayerCount": 16,
+  "resolvedAssetCount": 4,
+  "browserExport": {
+    "bounds": {
+      "min": [
+        -0.30601921677589417,
+        7.344545156229287e-05,
+        -0.20595893263816833
+      ],
+      "max": [
+        0.30601921677589417,
+        0.24041905999183655,
+        0.20595893263816833
+      ]
+    },
+    "sourceEnvelopeErrorMetres": 0.00018393993377685547,
+    "sha256": "5fdab9f21bc0eb3739e25cad0da8a673f93755935a345b6a0cc80309f0f7f0bb",
+    "blenderDecimationRatio": 0.5,
+    "blenderVersion": "4.3.2"
+  },
+  "rootUsd": "simready_usd/sm_crate_black_a02_01.usd",
+  "usdVersion": [
+    0,
+    26,
+    11
+  ],
+  "sourceMetrics": {
+    "metersPerUnit": 1.0,
+    "upAxis": "Z",
+    "authored": true
+  },
+  "stationMetrics": {
+    "metersPerUnit": 1,
+    "upAxis": "Z"
+  },
+  "meshCount": 1,
+  "layerCount": 12,
+  "schemas": [
+    "CollectionAPI:Empty_joint_00",
+    "MaterialBindingAPI",
+    "NodeDefAPI",
+    "PhysicsCollisionAPI",
+    "PhysicsMassAPI",
+    "PhysicsMaterialAPI",
+    "PhysicsMeshCollisionAPI",
+    "PhysicsRigidBodyAPI",
+    "SemanticsLabelsAPI:material",
+    "SemanticsLabelsAPI:wikidata_class",
+    "SemanticsLabelsAPI:wikidata_qcode"
+  ],
+  "collisionPrims": 1,
+  "rigidBodyPrims": 1,
+  "rearWorldBoundsMetres": {
+    "min": [
+      -3.2358352768421175,
+      0.9142091822624208,
+      5.2582498032248856e-05
+    ],
+    "max": [
+      -2.624164723157883,
+      1.3257908177375795,
+      0.24040099544072652
+    ]
+  },
+  "rearAccessGapMetres": 3.118145153019147,
+  "obstructionGapMetres": 0.0,
+  "files": [
+    {
+      "path": "simready_usd/sm_crate_black_a02_01.usd",
+      "sha256": "d093d25beee9a98b7338cb9421a3e11bae0469c8d66ff772cd799a16d0d65b03",
+      "bytes": 23756
+    },
+    {
+      "path": "simready_usd/Textures/T_Plastic_Black_A_Albedo.png",
+      "sha256": "9634d367b0509cd36e80f3ea49a4fbe4a09633a1589a1f9dbaab8cd15c4d3b98",
+      "bytes": 3698909
+    },
+    {
+      "path": "simready_usd/Textures/T_Plastic_Black_A_Normal.png",
+      "sha256": "0af84cd83367e2d661af9ae82dfd87171f256d825e36a1640c43557b538e2803",
+      "bytes": 4301564
+    },
+    {
+      "path": "simready_usd/Textures/T_Plastic_Black_A_ORM.png",
+      "sha256": "1b6fbb8dd04ef38d9cf86dc37219a43821fd0ff9abf03c2da4001a9347967527",
+      "bytes": 3787948
+    },
+    {
+      "path": "simready_usd/payloads/base.usda",
+      "sha256": "5a516b8128cea385593f84ec279c8d0c80193791a5ea13622c6a3c71e6ff98db",
+      "bytes": 10249
+    },
+    {
+      "path": "simready_usd/payloads/geometries.usd",
+      "sha256": "65bac4c853f2b333a0d860c17840a044e9aca465c8951a214a8ae099be7f9cb1",
+      "bytes": 3332635
+    },
+    {
+      "path": "simready_usd/payloads/instances.usda",
+      "sha256": "9ab600aea7e70b4ba19bb197d3fa10f940f9f5c295b2fc5ddcf5981e8386b975",
+      "bytes": 6923
+    },
+    {
+      "path": "simready_usd/payloads/instances_mujoco.usda",
+      "sha256": "ed90ad472f9b8f524f461a0b9538a99573e12f4769caa4af45406017a0aa6508",
+      "bytes": 7195
+    },
+    {
+      "path": "simready_usd/payloads/instances_newton.usda",
+      "sha256": "05cf6ee0d0adfb4c8aca527ee93dd6a20549fb40b897e130c09a36ebb3890af1",
+      "bytes": 7046
+    },
+    {
+      "path": "simready_usd/payloads/instances_physx.usda",
+      "sha256": "8ec760648a9f2e1eddacb64b1b698cfba6ecd8272cce0b4d631b0dd9caa58902",
+      "bytes": 7063
+    },
+    {
+      "path": "simready_usd/payloads/materials.usda",
+      "sha256": "58bad09397303d899345e82feb498ebc4a161a4d909fe71df21e60f1cbf0469e",
+      "bytes": 11366
+    },
+    {
+      "path": "simready_usd/payloads/MuJoCo/enabled.usda",
+      "sha256": "f3dd1cc1a27417e5a0d2be6c504bfb20ba8641185188ff2e3257b15b4c2dc593",
+      "bytes": 6679
+    },
+    {
+      "path": "simready_usd/payloads/MuJoCo/disabled.usda",
+      "sha256": "5c15eb982c357ff7fb5102e3c7e1d85f48d41793ac2dfd4adcde5e7abeda7056",
+      "bytes": 5944
+    },
+    {
+      "path": "simready_usd/payloads/Newton/disabled.usda",
+      "sha256": "5c15eb982c357ff7fb5102e3c7e1d85f48d41793ac2dfd4adcde5e7abeda7056",
+      "bytes": 5944
+    },
+    {
+      "path": "simready_usd/payloads/Newton/enabled.usda",
+      "sha256": "57851cb6a4aed9c715a35d869c58a6d709762c50bc9fdf4f74b1d6eeffd6da78",
+      "bytes": 6501
+    },
+    {
+      "path": "simready_usd/payloads/PhysX/disabled.usda",
+      "sha256": "5c15eb982c357ff7fb5102e3c7e1d85f48d41793ac2dfd4adcde5e7abeda7056",
+      "bytes": 5944
+    },
+    {
+      "path": "simready_usd/payloads/PhysX/enabled.usda",
+      "sha256": "237dbcc4c7acea5b1c96aae3f366e1e81197f8f50ad8bbc9e94abbd7b4604ce8",
+      "bytes": 6218
+    },
+    {
+      "path": "simready_usd/payloads/Physics/physics.usda",
+      "sha256": "b03e1b14925b60ed3ee2e42911a582e4b7bafa80e8ea0bb578d58cdf30cff507",
+      "bytes": 6461
+    },
+    {
+      "path": "simready_usd/source_assets/OmniPBR.mdl",
+      "sha256": "6e6b3acbccd236e21a6c29964a431d2a53e77251cc6b8b1bc975eb1c62da1781",
+      "bytes": 16010
+    },
+    {
+      "path": "simready_usd/source_assets/OmniPBRBase.mdl",
+      "sha256": "a8fd9fe174e91892e94d06da90ba453a124024c2ce2c033be9d82c9e2f76a3b7",
+      "bytes": 19369
+    },
+    {
+      "path": "simready_usd/source_assets/OmniPBR_ClearCoat.mdl",
+      "sha256": "d84c5ba482561c0eaea2e0c5b607358af549e36cd921773462f92dbc4f32cbc3",
+      "bytes": 29789
+    },
+    {
+      "path": "simready_usd/source_assets/T_Plastic_Black_A_Albedo.png",
+      "sha256": "9634d367b0509cd36e80f3ea49a4fbe4a09633a1589a1f9dbaab8cd15c4d3b98",
+      "bytes": 3698909
+    },
+    {
+      "path": "simready_usd/source_assets/T_Plastic_Black_A_Normal.png",
+      "sha256": "0af84cd83367e2d661af9ae82dfd87171f256d825e36a1640c43557b538e2803",
+      "bytes": 4301564
+    },
+    {
+      "path": "simready_usd/source_assets/T_Plastic_Black_A_ORM.png",
+      "sha256": "1b6fbb8dd04ef38d9cf86dc37219a43821fd0ff9abf03c2da4001a9347967527",
+      "bytes": 3787948
+    }
+  ],
+  "scope": "Pinned package integrity, native root-reference composition, authored metrics and static bounding-box controls.",
+  "pending": [
+    "NVIDIA schema/profile validation",
+    "renderer/material runtime",
+    "contact physics",
+    "physical dimensions",
+    "robot and tool clearances"
+  ]
+}

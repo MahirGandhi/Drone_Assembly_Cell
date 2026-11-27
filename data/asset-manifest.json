@@ -12,32 +12,31 @@
   "browser": {
     "path": "public/models/simready-crate.json",
     "url": "./models/simready-crate.json",
-    "sha256": "cf36bf0ee31f7d0d59efa210c817d3ff14019bf1d819aa862b474d23f1bfc624",
-    "bytes": 184236,
-    "vertices": 2892,
-    "triangles": 7472,
+    "sha256": "5fdab9f21bc0eb3739e25cad0da8a673f93755935a345b6a0cc80309f0f7f0bb",
+    "bytes": 1341202,
+    "vertices": 14388,
+    "triangles": 29306,
     "bounds": {
       "min": [
-        -0.294899,
-        -0.000455,
-        -0.198633
+        -0.30601921677589417,
+        7.344545156229287e-05,
+        -0.20595893263816833
       ],
       "max": [
-        0.294899,
-        0.22219,
-        0.198633
+        0.30601921677589417,
+        0.24041905999183655,
+        0.20595893263816833
       ]
     },
     "upAxis": "Y",
     "sceneUnits": "metres",
-    "dimensionEvidence": "resized display geometry; physical crate dimensions unverified",
+    "dimensionEvidence": "Vendor-authored native geometry in metres; physical measurements pending",
     "changes": [
-      "geometry conversion",
-      "reorientation",
-      "resizing",
+      "native world transform",
+      "Z-up to Y-up basis rotation",
+      "Blender decimation ratio 0.5",
       "triangulation",
-      "simplification",
-      "replacement material"
+      "replacement display material"
     ],
     "omitted": [
       "source hierarchy",
@@ -46,10 +45,17 @@
       "collision shapes",
       "semantics"
     ],
-    "conversionReproducible": false
+    "conversionReproducible": true,
+    "converter": "scripts/native_asset.py + scripts/convert-native-mesh.py",
+    "sourceEnvelopeErrorMetres": 0.00018393993377685547
   },
   "nativeValidation": {
-    "status": "pending",
-    "reason": "Native package dependencies, authored units and profiles have not been validated in this project."
+    "status": "cpu-composition-checked",
+    "report": "data/native-asset-report.json",
+    "pending": [
+      "NVIDIA schema/profile checks",
+      "contact simulation",
+      "physical validation"
+    ]
   }
 }
