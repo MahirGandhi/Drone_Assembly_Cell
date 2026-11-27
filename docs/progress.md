@@ -19,10 +19,6 @@ The manufacturer STEP imported in FreeCAD. See docs/engineering/reference-geomet
 
 Nominal access screening found a small intersection in each arm near upper-plate seating. All 16 simplified probes above the screws were clear against the included solids. See docs/engineering/reference-access.md for limits and the four unresolved intersections.
 
-## Product and line explorer
-
-The [exploded view and manufacturing line sprints](exploded-view-sprints.md) add a selectable 18-group BOM and a deterministic shift model with finite queues, shared operators, baseline comparison and staffing search. The existing fastening simulator remains available in the same application.
-
 ## Feedback loop
 
 Complete -> check -> scoped review -> fix blockers -> targeted recheck. Reviews use artifacts and evidence; they do not replace tests or sources. No broad research or parallel build tasks.
