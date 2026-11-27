@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {Cell,faults,makeCycle} from './cell.js';
+import {Cell,faults,gripFraction,makeCycle} from './cell.js';
 import {chooseLayout,compare,simulateShift} from './capacity.js';
 
 test('both handling routes transfer exactly one frame with 16 distinct accepted joints',()=>{
@@ -21,14 +21,57 @@ test('both handling routes transfer exactly one frame with 16 distinct accepted 
 
 test('guidance requires explicit authorization and command completes only following elapsed time',()=>{
   const cell=new Cell({guided:true});
-  cell.start();cell.tick(20);
+  cell.start();
+  assert.equal(cell.status,'waiting');
+  cell.tick(20);
+  assert.equal(cell.status,'waiting');
+  assert.equal(cell.time,0);
+  cell.stop();
+  assert.equal(cell.confirm(),false);
+  cell.start();
   assert.equal(cell.status,'waiting');
   assert.equal(cell.stock.nuts,32);
   assert.equal(cell.confirm(),true);
   cell.tick(1);
   assert.equal(cell.stock.nuts,32);
+  cell.stop();cell.tick(50);cell.start();
+  assert.equal(cell.status,'running');
+  assert.equal(cell.confirm(),false);
   cell.tick(7);
   assert.equal(cell.stock.nuts,16);
+  assert.equal(cell.history.filter(e=>e.type==='command' && e.text==='Load retained nuts').length,1);
+  cell.tick(20);
+  assert.equal(cell.op.key,'wire');
+  assert.equal(cell.status,'waiting');
+  assert.equal(cell.time,28);
+});
+
+test('pause holds elapsed work, material and joint records until deliberate resume',()=>{
+  const cell=new Cell();
+  cell.start();
+  assert.equal(cell.inFlight,true);
+  assert.equal(cell.op.key,'prepare');
+  const firstMove=cell.cycle.findIndex(op=>op.key==='move');
+  const beforeMove=cell.cycle.slice(0,firstMove).reduce((sum,op)=>sum+op.duration,0);
+  cell.tick(beforeMove+1);
+  assert.equal(cell.op.key,'move');
+  assert.equal(cell.screw,0);
+  const time=cell.time, elapsed=cell.elapsed;
+  cell.stop();
+  const frozen=JSON.stringify(cell.report());
+  cell.tick(86400);
+  assert.equal(JSON.stringify(cell.report()),frozen);
+  assert.equal(cell.elapsed,elapsed);
+  assert.equal(cell.time,time);
+  assert.equal(cell.inFlight,true);
+  cell.start();
+  assert.equal(cell.elapsed,elapsed);
+  cell.tick(1.1);
+  assert.equal(cell.op.key,'run');
+  assert.equal(cell.history.filter(e=>e.type==='command' && e.text==='Approach joint').length,1);
+  cell.tick(1000);
+  assert.equal(cell.output,1);
+  assert.equal(cell.attempts.length,16);
 });
 
 test('fault holds material and requires controlled recovery and deliberate restart',()=>{
@@ -50,6 +93,32 @@ test('fault holds material and requires controlled recovery and deliberate resta
     assert.equal(32-c.stock.screws,16+c.scrap);
     assert.equal(32-c.stock.nuts,16+c.lostNuts);
     assert.ok(c.nuts.every(nut=>nut==='joint'));
+  }
+});
+
+test('unload requires an available pallet, then grip confirmation before the fixture opens',()=>{
+  for (const auto of [true,false]) {
+    const cell=new Cell({auto});
+    const beforeUnload=cell.cycle.slice(0,-1).reduce((sum,op)=>sum+op.duration,0);
+    cell.start();cell.tick(beforeUnload+.1);
+    assert.equal(cell.op.key,'unload');
+    assert.equal(cell.clamped,true);
+    assert.ok(Object.values(cell.parts).every(owner=>owner==='fixture'));
+    cell.tick(cell.op.duration*gripFraction);
+    assert.equal(cell.clamped,false);
+    assert.ok(Object.values(cell.parts).every(owner=>owner===cell.op.resource));
+    assert.equal(cell.output,0);
+    cell.stop();cell.tick(100);cell.start();cell.tick(100);
+    assert.equal(cell.output,1);
+    assert.ok(Object.values(cell.parts).every(owner=>owner==='output'));
+
+    const blocked=new Cell({auto,fault:'output'});
+    blocked.start();blocked.tick(1000);
+    assert.ok(Math.abs(blocked.time-beforeUnload)<1e-6);
+    assert.equal(blocked.status,'held');
+    assert.equal(blocked.inFlight,false);
+    assert.equal(blocked.clamped,true);
+    assert.ok(Object.values(blocked.parts).every(owner=>owner==='fixture'));
   }
 });
 
@@ -86,6 +155,9 @@ test('shift layouts carry per-cell output and choose the first configuration tha
   assert.equal(chosen.bays.length,chosen.cells);
   assert.equal(chosen.bays.reduce((sum,bay)=>sum+bay.good,0),chosen.nominal);
   assert.equal(chosen.bays.reduce((sum,bay)=>sum+bay.wait,0)/60,chosen.waitingMinutes);
+  const nominal=simulateShift({cells:chosen.cells,operators:chosen.operators,seconds:420*60,auto:true,seed:17,variation:0});
+  assert.equal(chosen.goodFramesPerHour,chosen.nominal/7);
+  assert.equal(chosen.operatorUtilization,nominal.work/(chosen.operators*420*60));
   const impossible=compare(2000,420,true);
   assert.equal(chooseLayout(impossible).shortfall,Math.min(...impossible.map(row=>row.shortfall)));
   assert.ok(compare(120,420,false)[0].nominal<low[0].nominal);

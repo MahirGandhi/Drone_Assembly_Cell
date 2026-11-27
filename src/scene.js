@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import geometry from '../data/reference-geometry.json';
-import {parts} from './cell.js';
+import {gripFraction,jointOrder,parts} from './cell.js';
 import {SVGObject} from 'three/addons/renderers/SVGRenderer.js';
 import {makeRenderer} from './renderer.js';
 
@@ -78,6 +78,7 @@ export function createView(host) {
   let motionDirty=false;
   let lastStatus;
   let lastAccess;
+  let lastStop;
   let lastTime;
   let cameraMode='top';
   let snapshot;
@@ -142,11 +143,13 @@ export function createView(host) {
     clamps.push({lever,toe,sign});
   }
   const jointLocations=geometry.joints.map(j=>V(fx+j.axis_xz_mm[0]/1000,fy+.035,fz+j.axis_xz_mm[1]/1000));
-  const indicators=jointLocations.map(v=>{
-    cyl(station,v.x,fy-.007,v.z,.006,.012,steel,6);
-    const head=cyl(station,v.x,v.y,v.z,.004,.004,white,12);
-    return head;
-  });
+  const nutMarkers=jointLocations.map(v=>cyl(station,v.x,fy-.007,v.z,.006,.012,steel,6));
+  const indicators=jointLocations.map(v=>cyl(station,v.x,v.y,v.z,.004,.004,white,12));
+  const workRing=solid(station,new T.RingGeometry(.88,1,32),
+    new T.MeshBasicMaterial({color:0x63e1f0,depthTest:false,side:T.DoubleSide}),0,0,0,false);
+  workRing.rotation.x=-Math.PI/2;
+  workRing.renderOrder=8;
+  workRing.receiveShadow=false;
   function plate(width,height) {
     const group=new T.Group();
     const pts=[[-.05,-.0718],[.05,-.0718],[.0718,-.05],[.0718,.05],[.05,.0718],[-.05,.0718],[-.0718,.05],[-.0718,-.05]];
@@ -208,7 +211,8 @@ export function createView(host) {
   }).catch(()=>{});
   // Screw rack and tool dock.
   box(station,1.35,.9,-.7,.43,.075,.33,dark);
-  for(let i=0;i<16;i++) cyl(station,1.2+i%4*.092,.953,-.82+Math.floor(i/4)*.07,.005,.036,steel,10);
+  const feeder=jointLocations.map((_,i)=>V(1.2+i%4*.092,.953,-.82+Math.floor(i/4)*.07));
+  const rackScrews=feeder.map(p=>cyl(station,p.x,p.y,p.z,.005,.036,steel,10));
   box(station,1.84,.927,-.71,.24,.128,.3,blue);
   cyl(station,1.84,1.05,-.71,.045,.16,steel);
   box(station,2.83,.68,-.27,.53,1.34,.55,white);
@@ -229,6 +233,7 @@ export function createView(host) {
   const tool=new T.Group();station.add(tool);
   box(tool,0,0,0,.071,.095,.067,dark);
   const bit=cyl(tool,0,-.089,0,.009,.092,steel);
+  const heldScrew=cyl(tool,0,-.153,0,.003,.038,steel,8);
   const jaw1=box(tool,-.027,-.059,0,.019,.062,.023,steel);
   const jaw2=box(tool,.027,-.059,0,.019,.062,.023,steel);
   const home=V(.37,1.49,-.42);
@@ -238,10 +243,17 @@ export function createView(host) {
   cyl(operator,0,1.25,0,.15,.37,mat(0x888f62));
   solid(operator,new T.SphereGeometry(.087,14,10),mat(0xa67b60),0,1.52,0);
   solid(operator,new T.SphereGeometry(.10,16,10,0,Math.PI*2,0,Math.PI*.52),yellow,0,1.55,0);
+  const workerArms=[];
   for(const sign of [-1,1]){
     line(operator,V(sign*.069,.08,0),V(sign*.069,1.08,0),.055,dark);
     box(operator,sign*.068,.04,.038,.115,.075,.2,rubber);
-    line(operator,V(sign*.13,1.37,0),V(sign*.19,1.06,.114),.045,mat(0x888f62));
+    const atShoulder=V(sign*.13,1.37,0);
+    const atElbow=V(sign*.17,1.17,.045);
+    const atHand=V(sign*.19,1.06,.114);
+    const sleeve=line(operator,atShoulder,atElbow,.046,mat(0x888f62));
+    const forearm=line(operator,atElbow,atHand,.037,mat(0x99765d));
+    const glove=cyl(operator,atHand.x,atHand.y,atHand.z,.043,.08,dark,10);
+    workerArms.push({sign,atShoulder,sleeve,forearm,glove});
   }
 
   function label(text,x,z,parent=station) {
@@ -386,53 +398,111 @@ export function createView(host) {
       render(now,false);
       return;
     }
-    const statusChanged=lastStatus!==cell.status || lastAccess!==cell.accessOpen;
+    const statusChanged=lastStatus!==cell.status || lastAccess!==cell.accessOpen || lastStop!==cell.stopLatched;
     const changed=statusChanged || lastTime!==cell.time;
     lastStatus=cell.status;
     lastAccess=cell.accessOpen;
+    lastStop=cell.stopLatched;
     lastTime=cell.time;
+    if (!changed && !needsRender) {
+      render(now,false);
+      return;
+    }
     const op=cell.op;
-    const executing=op && (cell.inFlight || cell.status==='running');
+    const executing=cell.inFlight;
     const f=op?clamp(cell.elapsed/op.duration,0,1):0;
+    const delivery=op?.key==='unload'?1:.8;
+    const carry=clamp((f-gripFraction)/(delivery-gripFraction),0,1);
+    const outputOffset=V(1.68,-.16,.13);
+    const transfer=V(0,0,0);
+    if (cell.parts.top==='output') transfer.copy(outputOffset);
+    else if (op?.key==='unload' && executing) {
+      transfer.copy(outputOffset).multiplyScalar(carry);
+      transfer.y+=.28*Math.sin(Math.PI*carry);
+    }
     for(const key of parts){
       const obj=objects[key], placed=cell.parts[key]!=='tray', pos=placement[key];
       obj.position.copy(placed?pos:inputs[key]);
       const ai=key.startsWith('arm')?Number(key.at(-1)):-1;
       obj.rotation.y=ai<0?0:placed?-angles[ai]:0;
       if(executing && op.key===key && !placed) {
-        const blend=clamp((f-.24)*1.75,0,1);
-        obj.position.lerp(pos,blend);
-        obj.position.y+=Math.sin(blend*Math.PI)*.26;
-        if(ai>=0) obj.rotation.y=-angles[ai]*blend;
+        obj.position.lerp(pos,carry);
+        obj.position.y+=Math.sin(carry*Math.PI)*.26;
+        if(ai>=0) obj.rotation.y=-angles[ai]*carry;
       }
-      if(op?.key==='unload' && executing && placed && !cell.driver) {
-        const b=clamp((f-.2)/.7,0,1);
-        obj.position.add(V(1.68*b,.28*Math.sin(Math.PI*b),.13*b));
-      }
-      if(cell.parts[key]==='output') obj.position.add(V(1.68,-.16,.13));
+      if (placed) obj.position.add(transfer);
     }
     for(let i=0;i<16;i++){
+      const nut=nutMarkers[i];
+      nut.visible=cell.nuts[i]==='fixture'||cell.nuts[i]==='joint';
+      nut.position.set(jointLocations[i].x,fy-.007,jointLocations[i].z).add(transfer);
       const head=indicators[i];head.visible=cell.parts.top!=='tray';
       head.material=cell.held?.joint===i?red:cell.accepted.has(i)?green:white;
-      head.position.copy(jointLocations[i]);
-      if(cell.status==='complete') head.position.add(V(1.68,-.16,.13));
+      head.position.copy(jointLocations[i]).add(transfer);
+      rackScrews[i].visible=cell.screw!==i && !cell.accepted.has(i);
     }
     clamps.forEach(({lever,toe,sign})=>{
       lever.rotation.y=cell.clamped?0:sign*Math.PI/2;
       toe.visible=cell.clamped;
     });
-    beacon.material=cell.status==='held'?red:cell.status==='waiting'?yellow:green;
+    beacon.material=cell.stopLatched||cell.status==='held'?red:
+      ['waiting','paused'].includes(cell.status)?yellow:green;
     gate.rotation.y=cell.accessOpen?Math.PI/2:0;
-    operator.position.set(op?.resource==='operator' && executing ? -.38 : 1.1, 0, op?.resource==='operator' && executing ? 1.62 : 2.57);
     tip.copy(home);
-    if(executing && op.resource==='robot'){
-      if(parts.includes(op.key)) tip.copy(objects[op.key].position).add(V(0,.12,0));
-      if(op.key==='dock' || op.key==='undock') tip.lerp(dock,Math.sin(f*Math.PI));
-      if(op.key==='pick') tip.copy(V(1.2+op.joint%4*.092,1.1,-.82+Math.floor(op.joint/4)*.07));
-      if(['move','run','tighten'].includes(op.key)) {
-        tip.copy(jointLocations[op.joint]).add(V(0,op.key==='move'?.23-.11*f:.12-.022*f,0));
+    if (executing) {
+      if (op.resource==='robot' && (parts.includes(op.key)||op.key==='unload')) {
+        const gripPoint=objects[op.key==='unload'?'top':op.key].position.clone().add(V(0,.12,0));
+        const approach=op.key==='unload'?dock:home;
+        if (f<gripFraction) tip.lerpVectors(approach,gripPoint,f/gripFraction);
+        else if (op.key==='unload') tip.copy(gripPoint);
+        else tip.copy(gripPoint).lerp(home,clamp((f-.8)/.2,0,1));
       }
-      if(op.key==='unload') tip.copy(objects.top.position).add(V(0,.13,0));
+      if (op.key==='dock') tip.lerp(dock,f);
+      if (op.key==='pick') {
+        const previous=cell.cycle[cell.index-1]?.joint;
+        const from=previous===undefined?dock:jointLocations[previous].clone().add(V(0,.28,0));
+        tip.lerpVectors(from,feeder[op.joint].clone().add(V(0,.17,0)),f);
+        tip.y+=.27*Math.sin(Math.PI*f);
+      }
+      if (op.key==='move') {
+        tip.lerpVectors(feeder[op.joint].clone().add(V(0,.17,0)),jointLocations[op.joint].clone().add(V(0,.28,0)),f);
+        tip.y+=.27*Math.sin(Math.PI*f);
+      }
+      if (op.key==='run'||op.key==='tighten') {
+        const lift=op.key==='run'?1-f:clamp((f-.8)/.2,0,1);
+        tip.copy(jointLocations[op.joint]).add(V(0,.17+.11*lift,0));
+      }
+      if (op.key==='inspect'||op.key==='undock') {
+        tip.copy(jointLocations[jointOrder.at(-1)]).add(V(0,.28,0));
+        if (op.key==='undock') tip.lerp(dock,f);
+      }
+    } else if (cell.status==='complete' && cell.auto) tip.copy(objects.top.position).add(V(0,.12,0));
+    const operatorWorking=executing && op.resource==='operator';
+    const operatorAtOutput=cell.status==='complete' && !cell.auto;
+    // All gestures use modeled step progress so a pause also holds the worker's pose.
+    const workPoint=V(fx,fy+.045,fz);
+    if (operatorWorking || operatorAtOutput) {
+      if (operatorAtOutput || op.key==='unload') workPoint.copy(objects.top.position);
+      else if (parts.includes(op.key)) workPoint.copy(objects[op.key].position);
+      else if (op.key==='prepare') workPoint.copy(jointLocations[Math.min(15,Math.floor(f*16))]);
+      else if (op.key==='wire') workPoint.copy(placement['arm'+Math.min(3,Math.floor(f*4))]);
+      operator.position.set(workPoint.x,0,Math.max(1.15,workPoint.z+.55));
+    } else operator.position.set(1.1,0,2.57);
+    operator.rotation.y=Math.PI;
+    for (const {sign,atShoulder,sleeve,forearm,glove} of workerArms) {
+      const reach=operatorWorking || operatorAtOutput ? .5-.5*Math.cos(2*Math.PI*(f*4+(sign+1)/4)) : 0;
+      const atElbow=V(sign*.18,1.13+.07*reach,.05+.2*reach);
+      const atHand=V(sign*.16,1.05,.12);
+      if (operatorWorking || operatorAtOutput) atHand.lerp(V(sign*.046,workPoint.y+.04,operator.position.z-workPoint.z),.4+.6*reach);
+      setLine(sleeve,atShoulder,atElbow);
+      setLine(forearm,atElbow,atHand);
+      glove.position.copy(atHand);
+    }
+    workRing.visible=executing;
+    if (executing) {
+      workRing.position.copy(operatorWorking?workPoint:op.resource==='robot'?tip:V(fx,fy+.04,fz));
+      const radius=op.joint!==undefined?.10:.22;
+      workRing.scale.setScalar(radius);
     }
     const delta=tip.clone().sub(base), length=delta.length();
     const mid=base.clone().addScaledVector(delta,.5);
@@ -442,10 +512,11 @@ export function createView(host) {
     setLine(upper,shoulder.position,mid);setLine(lower,mid,tip);
     setLine(cable,mid.clone().add(V(0,.09,0)),tip.clone().add(V(0,.05,0)));
     tool.position.copy(tip).add(V(0,-.035,0));bit.visible=cell.driver;jaw1.visible=jaw2.visible=!cell.driver;
+    heldScrew.visible=cell.screw!==null;
     if (!snapshot) {
       snapshot=new T.Group();
       for (const object of station.children) {
-        if (object.name!=='station-operator' && object.name!=='floor-label' && !guides.includes(object)) {
+        if (object!==workRing && object.name!=='station-operator' && object.name!=='floor-label' && !guides.includes(object)) {
           snapshot.add(object.clone());
         }
       }

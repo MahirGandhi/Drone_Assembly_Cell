@@ -2,36 +2,99 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>X500 Assembly Cell</title></head>
 <body>
-<header><div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div><div class="header-tools"><span class="context">Nominal geometry · Modeled cycle</span><button id="open-product" type="button" aria-haspopup="dialog">Explore components</button></div></header>
+<header>
+  <div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div>
+  <div class="header-tools">
+    <span class="context">Nominal geometry · Modeled cycle</span>
+    <button id="open-product" type="button" aria-haspopup="dialog">Explore components</button>
+    <button id="open-about" type="button" aria-haspopup="dialog" aria-controls="about-station">About</button>
+  </div>
+</header>
 <main>
-<section class="view" id="station" aria-label="3D assembly cell" tabindex="-1">
-<div id="scene"></div>
-<div class="overlay"><div><small>CAMERA</small><strong id="camera-label">Overhead</strong></div><div class="view-buttons"><button id="top" aria-pressed="true">Top</button><button id="iso" aria-pressed="false">Isometric</button><button id="focus" aria-pressed="false">Fixture</button><button id="plan" aria-pressed="false">Shift layout</button></div></div>
-<div class="station-bottom">
-<div id="part-guide" hidden><div><strong id="guide-part"></strong><p id="guide-operation"></p></div><button id="clear-guide" type="button" aria-label="Clear component highlight">×</button></div>
-<div id="shift-layout-details" class="shift-layout-details" hidden><strong id="layout-title"></strong><p id="layout-output"></p><ol id="layout-bays" aria-label="Modeled output by cell"></ol></div>
-<div id="gate" class="gate">Automatic motion available</div>
-<div class="legend" id="station-legend"><span><i></i> Cell boundary</span><span><i></i> Joint accepted</span><span><i></i> Joint pending</span></div>
-</div>
-</section>
-<aside class="panel">
-<div class="section-title"><h1>Cell controls</h1><span id="status" data-state="ready">Ready</span></div>
-<div class="metrics"><div><small>CYCLE TIME</small><strong id="time">0.0 s</strong></div><div><small>JOINTS ACCEPTED</small><strong id="joints">0 / 16</strong></div><div><small>INPUT KITS</small><strong id="input-kits">2</strong></div><div><small>ACCEPTED OUTPUT</small><strong id="good-output">0</strong></div></div>
-<div class="operation"><small>ACTIVE OPERATION</small><strong id="op">Ready to start</strong><div class="progress"><div id="bar"></div></div></div>
-<div class="actions"><button id="run" class="primary">Start cycle</button><button id="reset">New run</button></div>
-<div class="actions"><button id="estop">Emergency stop</button><button id="ack" disabled>Acknowledge stop</button></div>
-<button id="confirm" class="wide" hidden>Confirm operator work</button><div id="recovery" hidden><p id="reason"></p><button id="access">Open gate</button><button id="recover" disabled>Confirm corrective action</button></div>
-<div class="fields"><label>Handling<select id="mode"><option value="auto">Robot assisted</option><option value="manual">Operator loaded</option></select></label><label>Speed<select id="speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="12">12×</option></select></label></div>
-<label>Scenario<select id="fault"><option value="">Normal cycle</option></select></label>
-<div class="logs"><h2>Event log</h2><ol id="events"><li>Waiting for cycle start.</li></ol></div>
-<button id="export" class="wide">Export run record</button>
-</aside>
-<section class="capacity">
-<div><small>SHIFT PLANNING</small><h2>Plan the assembly station</h2><p>Set a cell layout to estimate output, or enter a target to find which layout meets it.</p></div>
-<form id="capacity" novalidate><label>Required good frames<input id="target" type="number" min="1" max="2000" value="120"></label><label>Available minutes<input id="minutes" type="number" min="1" max="720" value="420" required></label><label>Cells / shared operators<select id="configuration"></select></label><button type="submit" value="estimate">Estimate output</button><button type="submit" value="target">Find layout</button></form>
-<div id="capacity-result" aria-live="polite"></div>
-</section>
+  <section class="controls" aria-label="Station controls">
+    <div class="cycle-controls">
+      <div class="section-title">
+        <h1>Cell controls</h1>
+        <span id="status" role="status" data-state="ready">Ready</span>
+        <button id="export">Export run record</button>
+      </div>
+      <div class="cycle-fields">
+        <label>Handling<select id="mode"><option value="auto">Robot assisted</option><option value="manual">Operator loaded</option></select></label>
+        <label>Speed<select id="speed"><option value="1">1×</option><option value="4" selected>4×</option><option value="12">12×</option></select></label>
+        <label>Scenario<select id="fault"><option value="">Normal cycle</option></select></label>
+      </div>
+      <div class="actions">
+        <button id="run" class="primary">Start cycle</button>
+        <button id="reset">New run</button>
+        <button id="estop">Emergency stop</button>
+        <button id="ack" disabled>Acknowledge stop</button>
+        <label class="guided-option"><input id="guided" type="checkbox">Confirm operator steps</label>
+        <button id="confirm" hidden>Confirm operator work</button>
+      </div>
+      <div id="recovery" hidden>
+        <p id="reason"></p>
+        <div class="actions"><button id="access">Open gate</button><button id="recover" disabled>Confirm corrective action</button></div>
+      </div>
+    </div>
+    <section class="shift-controls" aria-labelledby="shift-title">
+      <h2 id="shift-title">Shift planning</h2>
+      <form id="capacity" novalidate>
+        <div class="shift-fields">
+          <label>Required good frames<input id="target" type="number" min="1" max="2000" value="120"></label>
+          <label>Available minutes<input id="minutes" type="number" min="1" max="720" value="420" required></label>
+          <label>Cells / shared operators<select id="configuration"></select></label>
+        </div>
+        <div class="actions">
+          <button type="submit" value="estimate">Estimate output</button>
+          <button type="submit" value="target">Find layout</button>
+        </div>
+      </form>
+    </section>
+  </section>
+
+  <section class="view" id="station" aria-label="3D assembly cell" tabindex="-1">
+    <div class="camera-toolbar" role="group" aria-label="Camera views">
+      <div class="camera-name"><small>CAMERA</small><strong id="camera-label">Overhead</strong></div>
+      <div class="view-buttons">
+        <button id="top" aria-pressed="true">Top</button>
+        <button id="iso" aria-pressed="false">Isometric</button>
+        <button id="focus" aria-pressed="false">Fixture</button>
+        <button id="plan" aria-pressed="false">Shift layout</button>
+      </div>
+    </div>
+    <div class="viewport">
+      <div id="scene"></div>
+      <div class="station-bottom">
+        <div id="part-guide" hidden><div><strong id="guide-part"></strong><p id="guide-operation"></p></div><button id="clear-guide" type="button" aria-label="Clear component highlight">×</button></div>
+        <div id="shift-layout-details" class="shift-layout-details" hidden><strong id="layout-title"></strong><p id="layout-output"></p><ol id="layout-bays" aria-label="Modeled output by cell"></ol></div>
+        <div id="gate" class="gate">Gate closed</div>
+        <div class="legend" id="station-legend"><span><i></i> Cell boundary</span><span><i></i> Joint accepted</span><span><i></i> Joint pending</span><span><i></i> Active work</span></div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Run monitor">
+    <div class="operation"><small>ACTIVE OPERATION</small><strong id="op">Ready to start</strong><div class="progress"><div id="bar"></div></div></div>
+    <div class="metrics">
+      <div><small>SIMULATED CYCLE TIME</small><strong id="time">0.0 s</strong></div>
+      <div><small>JOINTS ACCEPTED</small><strong id="joints">0 / 16</strong></div>
+      <div><small>KITS ON HAND</small><strong id="input-kits">2</strong></div>
+      <div><small>GOOD FRAMES AT OUTPUT</small><strong id="good-output">0</strong></div>
+      <div><small>SCREWS SCRAPPED</small><strong id="scrapped-screws">0</strong></div>
+    </div>
+    <div class="logs"><h2>Event log</h2><ol id="events"><li>Waiting for cycle start.</li></ol></div>
+  </aside>
+  <section class="capacity-results" aria-labelledby="results-title"><h2 id="results-title">Shift planning results</h2><div id="capacity-result" aria-live="polite"></div></section>
 </main>
+<dialog class="about-station" id="about-station" aria-labelledby="about-title">
+  <div class="about-heading">
+    <h2 id="about-title">About the assembly cell</h2>
+    <form method="dialog"><button autofocus aria-label="Close About">Close</button></form>
+  </div>
+  <p>I built this simulation to work through how an X500 drone frame goes together and how many frames a team could finish in a shift.</p>
+  <p><strong>Explore components</strong> shows what each part does and where it enters the station. <strong>Start cycle</strong> runs one frame through loading, wire routing, fastening and inspection. Try a fault to see what stops the cell and what it takes to restart.</p>
+  <p><strong>Shift planning</strong> compares cell layouts and staffing against a production target. It shows output and time spent waiting for an operator. Task times are assumptions, and shift estimates exclude faults.</p>
+</dialog>
 <dialog class="product-tour" id="product-tour" aria-labelledby="product-tour-title">
 <div class="product-tour-heading"><div><h2 id="product-tour-title">Components of the X500 frame</h2><p>X500 V2-inspired exploded view</p></div><form method="dialog"><button aria-label="Close component introduction">Close</button></form></div>
 <div class="product-tour-content"><div id="product-scene"></div><div class="product-tour-side">

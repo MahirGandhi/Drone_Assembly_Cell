@@ -5,6 +5,7 @@ import {chooseLayout,compare,configurations} from './capacity.js';
 import {initProductTour} from './product-tour.js';
 
 const byId=id=>document.getElementById(id);
+byId('open-about').addEventListener('click', () => byId('about-station').showModal());
 for(const [key,[label]] of Object.entries(faults)) byId('fault').add(new Option(label,key));
 let view;
 try {view=createView(byId('scene'));}
@@ -13,43 +14,58 @@ catch(error) {
   byId('scene').textContent='The 3D view is unavailable. Cycle controls and shift planning are still available.';
 }
 let cell;
-let last=-1;
+let lastTick;
+let speed=Number(byId('speed').value);
 let rendered=0;
 let lastRefresh=0;
 let activePlan;
+let cameraKey='top';
+let liveCamera='top';
+const resources={operator:'Operator',robot:'Robot',fixture:'Fixture',inspection:'Inspection'};
 function reset() {
-  cell=new Cell({auto:byId('mode').value==='auto',fault:byId('fault').value,guided:true});
+  cell=new Cell({auto:byId('mode').value==='auto',fault:byId('fault').value,guided:byId('guided').checked});
+  lastTick=performance.now();
   rendered=-1;
   refresh();
 }
 function refresh() {
   const op=cell.op;
-  byId('status').dataset.state=cell.status;
-  byId('status').textContent={
-    ready:'Ready',running:'Running',waiting:'Operator needed',paused:'Paused',held:'Held',complete:'Complete'
+  const operation=(op?.label??'')+(op?.joint!==undefined?' · J'+String(op.joint+1).padStart(2,'0'):'');
+  byId('status').dataset.state=cell.stopLatched?'emergency':cell.status;
+  const status=cell.stopLatched?'Emergency stop':{
+    ready:'Ready',running:'Running',waiting:'Awaiting confirmation',paused:'Paused',held:'Held',complete:'Complete'
   }[cell.status];
+  if (byId('status').textContent!==status) byId('status').textContent=status;
   byId('time').textContent=cell.time.toFixed(1)+' s';
   byId('joints').textContent=cell.accepted.size+' / 16';
   byId('input-kits').textContent=cell.stock.frames;
   byId('good-output').textContent=cell.output;
+  byId('scrapped-screws').textContent=cell.scrap;
   byId('op').textContent=cell.status==='complete'?'Accepted frame at output':
-    cell.status==='ready'?'Ready to start':op?.label+(op?.joint!==undefined?' · J'+String(op.joint+1).padStart(2,'0'):'');
+    cell.status==='ready'?'Ready to start':operation;
   byId('bar').style.width=(op?100*cell.elapsed/op.duration:100)+'%';
   byId('confirm').hidden=cell.status!=='waiting';
   byId('confirm').disabled=cell.stopLatched;
+  if (cell.status==='waiting') byId('confirm').textContent='Confirm: '+op.label;
   byId('recovery').hidden=cell.status!=='held'&&!cell.accessOpen;
   byId('reason').textContent=cell.held?.reason??'Close the gate before restarting.';
   byId('access').textContent=cell.accessOpen?'Close gate':'Open gate';
   byId('recover').disabled=!cell.accessOpen||cell.status!=='held';
-  byId('gate').textContent=cell.stopLatched?'Emergency stop latched':cell.accessOpen?'Gate open · motion inhibited':
-    cell.status==='waiting'?'Operator station · confirmation required':
-    cell.status==='held'?'Cycle held · corrective action required':'Gate closed';
+  byId('gate').dataset.state=cell.stopLatched?'emergency':cell.status;
+  byId('gate').textContent=cell.stopLatched?'Emergency stop latched · Acknowledge stop to enable restart':
+    cell.accessOpen?'Gate open · motion inhibited':
+    cell.status==='waiting'?'Select Confirm in Cell controls to begin: '+op.label:
+    cell.status==='held'?'Cycle held · '+cell.held.reason:
+    cell.status==='paused'?'Paused · '+operation+' · '+cell.elapsed.toFixed(1)+' s into step':
+    cell.status==='running'?resources[op.resource]+' · '+operation+' · '+cell.elapsed.toFixed(1)+' / '+op.duration+' s':
+    cell.status==='complete'?'Frame at output · 16 joints accepted':'Gate closed';
   byId('run').textContent=['running','waiting'].includes(cell.status)?'Pause cycle':
     cell.status==='paused'?'Resume cycle':'Start cycle';
   byId('ack').disabled=!cell.stopLatched||cell.accessOpen;
+  byId('reset').disabled=cell.stopLatched;
   byId('estop').disabled=cell.stopLatched||cell.status==='complete';
   byId('run').disabled=cell.stopLatched||cell.accessOpen||['held','complete'].includes(cell.status);
-  byId('mode').disabled=byId('fault').disabled=cell.status!=='ready';
+  byId('mode').disabled=byId('fault').disabled=byId('guided').disabled=cell.status!=='ready'||cell.stopLatched;
   if(rendered!==cell.history.length) {
     rendered=cell.history.length;
     const entries=cell.history.slice(-9).reverse().map(e=>{
@@ -64,7 +80,9 @@ function refresh() {
   }
 }
 byId('run').onclick=()=>{
-  if(['running','waiting'].includes(cell.status)) cell.stop();else cell.start();
+  if(['running','waiting'].includes(cell.status)) cell.stop();
+  else if (cell.start()) lastTick=performance.now();
+  if (cameraKey==='plan') selectCamera(liveCamera);
   refresh();
 };
 byId('reset').onclick=()=>{
@@ -78,7 +96,14 @@ byId('mode').onchange=()=>{
   if (activePlan) calculatePlan('estimate',false);
 };
 byId('fault').onchange=reset;
-byId('confirm').onclick=()=>{cell.confirm();refresh();};
+byId('guided').onchange=reset;
+byId('confirm').onclick=()=>{
+  if (cell.confirm()) {
+    lastTick=performance.now();
+    if (cameraKey==='plan') selectCamera(liveCamera);
+  }
+  refresh();
+};
 byId('access').onclick=()=>{
   if(cell.accessOpen) cell.closeAccess();else cell.openAccess();
   refresh();
@@ -86,6 +111,8 @@ byId('access').onclick=()=>{
 byId('recover').onclick=()=>{cell.recover();refresh();};
 const cameraNames={top:'Overhead',iso:'Isometric',focus:'Fixture close-up',plan:'Shift layout'};
 function selectCamera(key) {
+  cameraKey=key;
+  if (key!=='plan') liveCamera=key;
   view?.setCamera(key);
   byId('camera-label').textContent=cameraNames[key];
   for (const name of Object.keys(cameraNames)) {
@@ -137,7 +164,7 @@ function calculatePlan(request,showLayout) {
   activePlan=chosen;
   view?.setLayout(chosen);
   byId('layout-title').textContent=`${chosen.cells} assembly ${chosen.cells===1?'cell':'cells'} · ${chosen.operators} shared ${chosen.operators===1?'operator':'operators'}`;
-  byId('layout-output').textContent=`${chosen.nominal} nominal good frames in ${minutes} min · ${chosen.waitingMinutes.toFixed(1)} min total operator wait`;
+  byId('layout-output').textContent=`${chosen.nominal} nominal good frames in ${minutes} min · ${chosen.waitingMinutes.toFixed(1)} min total cell wait for staff`;
   const bays=chosen.bays.map((bay,index)=>{
     const item=document.createElement('li');
     item.textContent=`Cell ${index+1} · ${bay.good} good frames · ${(bay.wait/60).toFixed(1)} min waiting`;
@@ -150,10 +177,14 @@ function calculatePlan(request,showLayout) {
     : request==='target'
       ? `No evaluated layout met the target in all five modeled shifts. The closest layout was ${chosen.shortfall} frames short in its lowest-output sample.`
       : `The selected layout was ${chosen.shortfall} frames short in its lowest-output sample.`;
-  byId('capacity-result').innerHTML=`<p>${message} The layout labels show nominal accepted output by cell. Five seeded samples vary assumed operation times by ±15%. Faults are excluded from the estimate. Replenishment and pallet service use 20 s of operator time every two frames.</p>
-    <table><thead><tr><th>Cells</th><th>Operators</th><th>Nominal good</th><th>Sample range</th><th>Shortfall at low sample</th><th>Nominal operator wait</th></tr></thead><tbody>${
-      rows.map(row=>`<tr aria-current="${row===chosen}"><td>${row.cells}</td><td>${row.operators}</td><td>${row.nominal}</td><td>${row.min}–${row.max}</td><td>${row.shortfall??'–'}</td><td>${row.waitingMinutes.toFixed(1)} min</td></tr>`).join('')
-    }</tbody></table>`;
+  const takt=target===null?'':` Required takt is <strong>${(minutes*60/target).toFixed(1)} s per good frame</strong> across the layout.`;
+  byId('capacity-result').innerHTML=`<p>${message}${takt}</p>
+    <table><thead><tr><th scope="col">Cells</th><th scope="col">Operators</th><th scope="col">Good frames</th><th scope="col">Good frames/hr</th><th scope="col">Operator utilization</th><th scope="col">Cell time waiting for staff</th><th scope="col">Good frames across samples</th><th scope="col">Shortfall at low sample</th></tr></thead><tbody>${
+      rows.map(row=>`<tr aria-current="${row===chosen}"><td>${row.cells}</td><td>${row.operators}</td><td>${row.nominal}</td><td>${row.goodFramesPerHour.toFixed(1)}</td><td>${(100*row.operatorUtilization).toFixed(1)}%</td><td>${row.waitingMinutes.toFixed(1)} min</td><td>${row.min}–${row.max}</td><td>${row.shortfall??'–'}</td></tr>`).join('')
+    }</tbody></table>
+    <details class="kpi-method"><summary>How the shift KPIs are calculated</summary>
+    <p>The model counts good frames when assembly and inspection finish and the frame reaches output. The hourly rate divides that count by available shift hours. Operator utilization divides busy time by available operator time. Cell wait adds up the time cells spend waiting for an operator. Takt divides available shift time by the good frames required.</p>
+    <p>The table shows the nominal run and the range from five samples that vary assumed task times by up to 15%. The model excludes faults and assumes 20 seconds of operator time for replenishment and pallet service after every two frames per cell.</p></details>`;
   if (showLayout) {
     selectCamera('plan');
     byId('station').focus({preventScroll:true});
@@ -170,15 +201,25 @@ byId('plan').onclick=()=>{
 };
 reset();
 view?.animate(cell);
-function frame(now) {
-  const dt=last<0?0:Math.min(.12,(now-last)/1000);
-  last=now;
-  cell.tick(dt*Number(byId('speed').value));
-  view?.animate(cell,now);
+function advance(now) {
+  if (lastTick!==undefined && !document.hidden && cell.status==='running') {
+    cell.tick((now-lastTick)/1000*speed);
+  }
+  lastTick=now;
+}
+byId('speed').onchange=()=>{
+  advance(performance.now());
+  speed=Number(byId('speed').value);
+};
+document.addEventListener('visibilitychange',()=>{lastTick=performance.now();});
+function frame() {
+  const now=performance.now();
+  advance(now);
   if(now-lastRefresh>=100 || rendered!==cell.history.length) {
     refresh();
     lastRefresh=now;
   }
+  view?.animate(cell,now);
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

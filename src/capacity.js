@@ -52,7 +52,10 @@ export function compare(target,minutes,auto) {
     const nominal=simulateShift({...input,seed:seeds[0],variation:0});
     const runs=seeds.map(seed=>simulateShift({...input,seed,variation:.15}).good);
     return {cells,operators,nominal:nominal.good,min:Math.min(...runs),max:Math.max(...runs),
-      shortfall:target===null ? null : Math.max(0,target-Math.min(...runs)),waitingMinutes:nominal.wait/60,bays:nominal.bays};
+      shortfall:target===null ? null : Math.max(0,target-Math.min(...runs)),
+      goodFramesPerHour:nominal.good/(minutes/60),
+      operatorUtilization:nominal.work/(operators*input.seconds),
+      waitingMinutes:nominal.wait/60,bays:nominal.bays};
   });
 }
 

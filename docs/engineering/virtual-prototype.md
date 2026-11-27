@@ -1,6 +1,8 @@
 # X500 assembly cell virtual prototype
 
-Open the overhead view, select **Start cycle**, and confirm operator work at the retained-nut preparation and cable-routing steps. All parts start in the input area. Use **Fixture** to see individual joint markers. To exercise a hold, start a new run with a fault selected, open the simulated gate, confirm corrective action, close the gate, then resume. The exported JSON includes the event sequence, screw losses, retained nuts and joint attempts.
+Select **Start cycle** to play one frame through the station. The operator loads retained nuts and routes the arm leads. Both tasks consume modeled time. Select **Confirm operator steps** before starting if you want to authorize each operator task yourself. While the cycle runs, the blue ring follows the active work. **Pause cycle** holds the current step, pose and counters until **Resume cycle**. Use **Fixture** to inspect the joint markers. To exercise a hold, start a new run with a fault selected, open the simulated gate, confirm corrective action, close the gate, then resume. The exported JSON includes the event sequence, screw losses, retained nuts and joint attempts.
+
+The modeled output pallet must have room before the unload starts. During unload the fixture retains the frame through the approach. At 22% of the assumed transfer duration the model confirms the handler's grip and opens the clamps. The handler owns the frame until it reaches the pallet and the output count increments. This timing split describes the display sequence. It has no measured hardware timing behind it.
 
 | Sprint | Reviewable prototype evidence | Remaining evidence |
 | --- | --- | --- |

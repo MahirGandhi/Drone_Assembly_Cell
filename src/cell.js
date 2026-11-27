@@ -13,6 +13,7 @@ export const faults = {
 };
 export const parts = ['base','arm0','arm1','arm2','arm3','top'];
 export const jointOrder = [0,15,4,11, 1,14,5,10, 2,13,6,9, 3,12,7,8];
+export const gripFraction=.22;
 const task = (key, label, duration, resource, joint) => ({key, label, duration, resource, joint});
 
 export function makeCycle(auto) {
@@ -52,7 +53,7 @@ export class Cell {
     this.accepted=new Set();
     this.stock={frames:2,screws:32,nuts:32};
     this.output=0;
-    this.outputLimit=2;
+    this.outputLimit=fault==='output'?0:2;
     this.scrap=0;
     this.nuts=Array(16).fill('tray');
     this.lostNuts=0;
@@ -83,8 +84,10 @@ export class Cell {
   }
   start() {
     if (!['ready','paused'].includes(this.status) || this.accessOpen || this.stopLatched) return false;
+    const resumed=this.status==='paused';
     this.status='running';
-    this.log('control','Cycle start');
+    this.log('control',resumed?'Cycle resumed':'Cycle start');
+    this.tick(0);
     return true;
   }
   stop() {
@@ -108,8 +111,7 @@ export class Cell {
     if (this.status!=='waiting' || this.accessOpen || this.stopLatched) return false;
     this.status='running';
     this.log('operator','Operator authorized '+this.op.label.toLowerCase());
-    this.issue();
-    return true;
+    return this.issue();
   }
   trip(reason,stage=this.op?.key) {
     this.status='held';
@@ -117,8 +119,20 @@ export class Cell {
     this.log('held',reason,this.held);
   }
   issue() {
-    this.inFlight=true;
     this.log('command',this.op.label,{joint:this.op.joint, recipe});
+    if (this.op.key==='unload') {
+      if (this.output>=this.outputLimit) {
+        if (this.fault==='output') this.faultUsed=true;
+        this.trip('Output pallet full');
+        return false;
+      }
+      if (!this.clamped || this.driver || this.accepted.size!==16 || parts.some(p=>this.parts[p]!=='fixture')) {
+        this.trip('Transfer prerequisites missing');
+        return false;
+      }
+    }
+    this.inFlight=true;
+    return true;
   }
   tick(dt) {
     if (!Number.isFinite(dt) || dt<0) throw new RangeError('Invalid time increment');
@@ -129,13 +143,21 @@ export class Cell {
           this.log('wait',this.op.label);
           return;
         }
-        this.issue();
+        if (!this.issue()) return;
       }
-      const used=Math.min(dt,this.op.duration-this.elapsed);
+      const acquiringFrame=this.op.key==='unload' && this.clamped;
+      const nextFeedback=acquiringFrame?this.op.duration*gripFraction:this.op.duration;
+      const used=Math.min(dt,nextFeedback-this.elapsed);
       this.elapsed+=used;
       this.time+=used;
       dt-=used;
-      if (this.elapsed + 1e-9 < this.op.duration) return;
+      if (this.elapsed + 1e-9 < nextFeedback) return;
+      if (acquiringFrame) {
+        this.clamped=false;
+        for (const key of parts) this.parts[key]=this.op.resource;
+        this.log('feedback','Modeled grip confirmed. Fixture released to '+this.op.resource+'.');
+        continue;
+      }
       this.inFlight=false;
       this.elapsed=0;
       if (!this.complete()) return;
@@ -145,7 +167,6 @@ export class Cell {
         this.log('accepted','Frame transferred to accepted output');
         return;
       }
-      if (dt<=0) return;
     }
   }
   complete() {
@@ -154,7 +175,6 @@ export class Cell {
       this.faultUsed=true;
       if (key==='tighten' || key==='run') this.record(false,faults[this.fault][0]);
       if (this.fault==='nut') {this.nuts[0]='missing';this.lostNuts++;this.log('material','Nut at J01 unaccounted for');}
-      if (this.fault==='output') this.outputLimit=this.output;
       this.trip(faults[this.fault][0]);
       return false;
     }
@@ -187,10 +207,9 @@ export class Cell {
     if (key==='undock') this.driver=false;
     if (key==='unload') {
       if (this.output>=this.outputLimit) error='Output pallet full';
-      else if (!this.clamped || this.driver || this.accepted.size!==16 ||
-        parts.some(p=>this.parts[p]!=='fixture')) error='Transfer prerequisites missing';
+      else if (this.clamped || this.driver || this.accepted.size!==16 ||
+        parts.some(p=>this.parts[p]!==this.op.resource)) error='Transfer prerequisites missing';
       else {
-        this.clamped=false;
         for (const p of parts) this.parts[p]='output';
         this.output++;
       }
@@ -206,7 +225,7 @@ export class Cell {
   }
   recover() {
     if (this.status!=='held' || !this.accessOpen) return false;
-    if (this.held.stage==='unload') {this.outputLimit=2;this.output=0;}
+    if (this.held.reason==='Output pallet full') this.outputLimit=this.output+2;
     if (this.held.reason==='Material shortage') {
       this.stock.frames+=2;this.stock.screws+=32;this.stock.nuts+=32;
     }
@@ -228,7 +247,7 @@ export class Cell {
     return true;
   }
   report() {
-    return {recipe,auto:this.auto,status:this.status,serial:this.serial,time:this.time,stock:this.stock,
+    return {recipe,auto:this.auto,guided:this.guided,status:this.status,serial:this.serial,time:this.time,stock:this.stock,
       parts:this.parts,retainedNuts:this.nuts,lostNuts:this.lostNuts,output:this.output,scrap:this.scrap,joints:this.attempts,events:this.history};
   }
 }
