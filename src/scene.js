@@ -5,6 +5,7 @@ import {gripFraction,jointOrder,parts} from './cell.js';
 import {SVGObject} from 'three/addons/renderers/SVGRenderer.js';
 import {makeRenderer} from './renderer.js';
 import asset from '../data/asset-manifest.json';
+import {operatorAccess,supplyPositions} from './supply-layout.js';
 
 const V=(x,y,z)=>new T.Vector3(x,y,z);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -198,7 +199,7 @@ export function createView(host,onAssetStatus=()=>{}) {
   box(station,1.84,.872,.53,.92,.022,.9,blue);
   for(const x of [1.41,2.27]) box(station,x,.894,.53,.024,.062,.88,blue);
   for(const z of [.09,.97]) box(station,1.84,.894,z,.88,.062,.024,blue);
-  const bin=new T.Group();bin.position.set(-2.93,0,-1.12);station.add(bin);
+  const bin=new T.Group();bin.name='supply-bin';bin.position.fromArray(supplyPositions.rear.translation);station.add(bin);
   box(bin,0,.10,0,.59,.2,.42,blue);
   box(bin,0,.203,0,.52,.005,.35,rubber);
   onAssetStatus('Loading supply crate…');
@@ -210,13 +211,21 @@ export function createView(host,onAssetStatus=()=>{}) {
       mesh.positions.length!==asset.browser.vertices*3||mesh.indices.length!==asset.browser.triangles*3) {
       throw new Error('Supply crate geometry does not match the recorded asset');
     }
-    bin.clear();
     const g=new T.BufferGeometry();
     g.setAttribute('position',new T.Float32BufferAttribute(mesh.positions,3));
     g.setIndex(mesh.indices);g.computeVertexNormals();
-    solid(bin,g,blue,0,0,0);
+    const updateBin=target=>{
+      target.clear();
+      solid(target,g,blue,0,0,0);
+    };
+    updateBin(bin);
+    const snapshotBin=snapshot?.getObjectByName('supply-bin');
+    if (snapshotBin) updateBin(snapshotBin);
+    layout.traverse(object=>{
+      if (object.name==='supply-bin') updateBin(object);
+    });
     needsRender=true;
-    onAssetStatus('Supply crate loaded · display geometry');
+    onAssetStatus('Supply crate loaded · display geometry',true);
   }).catch(error=>{
     console.error(error);
     onAssetStatus('Supply crate unavailable · placeholder shown');
@@ -357,6 +366,22 @@ export function createView(host,onAssetStatus=()=>{}) {
       layout.add(worker);
     }
     if (cameraMode==='plan') setCamera('plan');
+  }
+
+  const accessBounds=new T.Box3(V(...operatorAccess.min),V(...operatorAccess.max));
+  const accessGuide=new T.Box3Helper(accessBounds,0x70c9e9);
+  accessGuide.visible=false;
+  station.add(accessGuide);
+
+  function setSupplyPlacement(position,result,visible) {
+    bin.position.fromArray(position);
+    snapshot?.getObjectByName('supply-bin')?.position.fromArray(position);
+    layout.traverse(object=>{
+      if (object.name==='supply-bin') object.position.fromArray(position);
+    });
+    accessGuide.visible=visible;
+    accessGuide.material.color.setHex(result.status==='clear'?0x70c9e9:0xff725b);
+    needsRender=true;
   }
 
   const guides=Array.from({length:4},()=>{
@@ -528,7 +553,7 @@ export function createView(host,onAssetStatus=()=>{}) {
     if (!snapshot) {
       snapshot=new T.Group();
       for (const object of station.children) {
-        if (object!==workRing && object.name!=='station-operator' && object.name!=='floor-label' && !guides.includes(object)) {
+        if (object!==workRing && object!==accessGuide && object.name!=='station-operator' && object.name!=='floor-label' && !guides.includes(object)) {
           snapshot.add(object.clone());
         }
       }
@@ -537,5 +562,5 @@ export function createView(host,onAssetStatus=()=>{}) {
     else for (const guide of guides) guide.visible=false;
     render(now,changed);
   }
-  return {animate,setCamera,setLayout,highlight};
+  return {animate,setCamera,setLayout,highlight,setSupplyPlacement};
 }

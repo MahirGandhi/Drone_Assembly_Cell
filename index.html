@@ -50,6 +50,16 @@
         </div>
       </form>
     </section>
+    <details class="supply-controls" id="supply-study">
+      <summary>Supply-bin placement study</summary>
+      <form id="supply-layout">
+        <label>Bin position<select id="supply-position"><option value="rear">Rear supply position</option><option value="blocked">Gate obstruction example</option></select></label>
+        <label>Required gap (mm)<input id="supply-allowance" type="number" min="0" max="1000" step="1" value="100" required></label>
+        <button type="submit" disabled>Check access</button>
+      </form>
+      <p id="supply-result" role="status"></p>
+      <p>The outlined box marks assumed operator-access space at the gate. Red indicates insufficient clearance. This check compares the resized crate’s bounding box with that space. Required gap is a design input. Physical bin dimensions and access requirements need measurement.</p>
+    </details>
   </section>
 
   <section class="view" id="station" aria-label="3D assembly cell" tabindex="-1">

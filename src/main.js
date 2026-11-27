@@ -3,14 +3,22 @@ import {Cell,faults} from './cell.js';
 import {createView} from './scene.js';
 import {chooseLayout,compare,configurations} from './capacity.js';
 import {initProductTour} from './product-tour.js';
+import asset from '../data/asset-manifest.json';
+import {checkSupplyPlacement,supplyPositions} from './supply-layout.js';
 
 const byId=id=>document.getElementById(id);
 byId('open-about').addEventListener('click', () => byId('about-station').showModal());
 for(const [key,[label]] of Object.entries(faults)) byId('fault').add(new Option(label,key));
 let view;
-try {view=createView(byId('scene'),message=>{byId('asset-status').textContent=message;});}
+let supplyAssetLoaded=false;
+try {view=createView(byId('scene'),(message,loaded=false)=>{
+  supplyAssetLoaded=loaded;
+  byId('asset-status').textContent=message;
+  byId('supply-layout').querySelector('button').disabled=!loaded;
+});}
 catch(error) {
   console.error(error);
+  byId('asset-status').textContent='Supply crate unavailable · renderer failed';
   byId('scene').textContent='The 3D view is unavailable. Cycle controls and shift planning are still available.';
 }
 let cell;
@@ -134,6 +142,27 @@ initProductTour({onShowPart(part) {
   byId('station').focus({preventScroll:true});
   byId('station').scrollIntoView({block:'nearest'});
 }});
+const supplyStudy=byId('supply-study');
+function updateSupplyLayout(showCamera) {
+  if (!supplyAssetLoaded) {
+    byId('supply-result').textContent='Load the recorded supply-crate geometry before checking its placement.';
+    return;
+  }
+  const position=supplyPositions[byId('supply-position').value].translation;
+  const result=checkSupplyPlacement(asset.browser.bounds,position,Number(byId('supply-allowance').value));
+  view?.setSupplyPlacement(position,result,supplyStudy.open);
+  const message=result.status==='obstructed'?'Bin overlaps the access envelope.':
+    result.status==='below-allowance'?'Bin is closer than the required gap.':'Bin clears the assumed access envelope.';
+  byId('supply-result').textContent=message+' Bounding-box gap: '+result.gapMm.toFixed(1)+' mm. Required: '+result.allowanceMm+' mm.';
+  if (showCamera) selectCamera('top');
+}
+byId('supply-layout').onsubmit=event=>{
+  event.preventDefault();
+  if (byId('supply-layout').reportValidity()) updateSupplyLayout(true);
+};
+supplyStudy.addEventListener('toggle',()=>{
+  if (byId('supply-layout').checkValidity()) updateSupplyLayout(false);
+});
 byId('clear-guide').onclick=()=>{
   view?.highlight(null);
   byId('guide-part').textContent='';

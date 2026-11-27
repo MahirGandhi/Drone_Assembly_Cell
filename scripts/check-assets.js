@@ -22,4 +22,4 @@ assert.deepEqual(high,manifest.browser.bounds.max,'Asset maximum bounds changed'
 assert.match(manifest.source.revision,/^[a-f0-9]{40}$/,'Asset revision must be pinned');
 assert.equal(manifest.browser.conversionReproducible,false,'A reproducible converter requires separate evidence');
 assert.equal(manifest.nativeValidation.status,'pending','Native validation requires separate evidence');
-console.log('Supply crate digest, topology, bounds and provenance verified.');
+console.log('Supply crate local digest, topology, bounds and source-revision format verified.');
