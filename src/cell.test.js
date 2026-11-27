@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Cell,faults,makeCycle} from './cell.js';
-import {compare,simulateShift} from './capacity.js';
+import {chooseLayout,compare,simulateShift} from './capacity.js';
 
 test('both handling routes transfer exactly one frame with 16 distinct accepted joints',()=>{
   for(const auto of [true,false]) {
@@ -74,4 +74,22 @@ test('capacity respects exact horizon, contention, infeasible demand and fixed s
   assert.deepEqual(low,compare(1,420,true));
   assert.ok(compare(2000,420,true).every(r=>r.shortfall>0));
   assert.throws(()=>compare(0,420,true),RangeError);
+});
+
+test('shift layouts carry per-cell output and choose the first configuration that meets demand',()=>{
+  const low=compare(120,420,true);
+  assert.equal(chooseLayout(low).cells,1);
+  const high=compare(300,420,true);
+  const chosen=chooseLayout(high);
+  assert.ok(chosen.cells>1);
+  assert.equal(chosen.shortfall,0);
+  assert.equal(chosen.bays.length,chosen.cells);
+  assert.equal(chosen.bays.reduce((sum,bay)=>sum+bay.good,0),chosen.nominal);
+  assert.equal(chosen.bays.reduce((sum,bay)=>sum+bay.wait,0)/60,chosen.waitingMinutes);
+  const impossible=compare(2000,420,true);
+  assert.equal(chooseLayout(impossible).shortfall,Math.min(...impossible.map(row=>row.shortfall)));
+  assert.ok(compare(120,420,false)[0].nominal<low[0].nominal);
+  const estimate=compare(null,420,true)[0];
+  assert.equal(estimate.nominal,low[0].nominal);
+  assert.equal(estimate.shortfall,null);
 });

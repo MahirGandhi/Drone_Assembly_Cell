@@ -2,17 +2,21 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>X500 Assembly Cell</title></head>
 <body>
-<header><div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div><span class="context">Nominal geometry · Modeled cycle</span></header>
+<header><div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div><div class="header-tools"><span class="context">Nominal geometry · Modeled cycle</span><button id="open-product" type="button" aria-haspopup="dialog">Explore components</button></div></header>
 <main>
-<section class="view" aria-label="3D assembly cell">
+<section class="view" id="station" aria-label="3D assembly cell" tabindex="-1">
 <div id="scene"></div>
-<div class="overlay"><div><small>CAMERA</small><strong id="camera-label">Overhead</strong></div><div class="view-buttons"><button id="top" aria-pressed="true">Top</button><button id="iso" aria-pressed="false">Isometric</button><button id="focus" aria-pressed="false">Fixture</button></div></div>
+<div class="overlay"><div><small>CAMERA</small><strong id="camera-label">Overhead</strong></div><div class="view-buttons"><button id="top" aria-pressed="true">Top</button><button id="iso" aria-pressed="false">Isometric</button><button id="focus" aria-pressed="false">Fixture</button><button id="plan" aria-pressed="false">Shift layout</button></div></div>
+<div class="station-bottom">
+<div id="part-guide" hidden><div><strong id="guide-part"></strong><p id="guide-operation"></p></div><button id="clear-guide" type="button" aria-label="Clear component highlight">×</button></div>
+<div id="shift-layout-details" class="shift-layout-details" hidden><strong id="layout-title"></strong><p id="layout-output"></p><ol id="layout-bays" aria-label="Modeled output by cell"></ol></div>
 <div id="gate" class="gate">Automatic motion available</div>
-<div class="legend"><span><i></i> Cell boundary</span><span><i></i> Joint accepted</span><span><i></i> Joint pending</span></div>
+<div class="legend" id="station-legend"><span><i></i> Cell boundary</span><span><i></i> Joint accepted</span><span><i></i> Joint pending</span></div>
+</div>
 </section>
 <aside class="panel">
 <div class="section-title"><h1>Cell controls</h1><span id="status" data-state="ready">Ready</span></div>
-<div class="metrics"><div><small>CYCLE TIME</small><strong id="time">0.0 s</strong></div><div><small>JOINTS ACCEPTED</small><strong id="joints">0 / 16</strong></div></div>
+<div class="metrics"><div><small>CYCLE TIME</small><strong id="time">0.0 s</strong></div><div><small>JOINTS ACCEPTED</small><strong id="joints">0 / 16</strong></div><div><small>INPUT KITS</small><strong id="input-kits">2</strong></div><div><small>ACCEPTED OUTPUT</small><strong id="good-output">0</strong></div></div>
 <div class="operation"><small>ACTIVE OPERATION</small><strong id="op">Ready to start</strong><div class="progress"><div id="bar"></div></div></div>
 <div class="actions"><button id="run" class="primary">Start cycle</button><button id="reset">New run</button></div>
 <div class="actions"><button id="estop">Emergency stop</button><button id="ack" disabled>Acknowledge stop</button></div>
@@ -23,8 +27,18 @@
 <button id="export" class="wide">Export run record</button>
 </aside>
 <section class="capacity">
-<div><small>SHIFT PLANNING</small><h2>Capacity comparison</h2><p>Compare simulated good frames by cell count and shared operator availability.</p></div>
-<form id="capacity"><label>Required good frames<input id="target" type="number" min="1" max="2000" value="120" required></label><label>Available minutes<input id="minutes" type="number" min="1" max="720" value="420" required></label><button type="submit">Compare configurations</button></form>
+<div><small>SHIFT PLANNING</small><h2>Plan the assembly station</h2><p>Set a cell layout to estimate output, or enter a target to find which layout meets it.</p></div>
+<form id="capacity" novalidate><label>Required good frames<input id="target" type="number" min="1" max="2000" value="120"></label><label>Available minutes<input id="minutes" type="number" min="1" max="720" value="420" required></label><label>Cells / shared operators<select id="configuration"></select></label><button type="submit" value="estimate">Estimate output</button><button type="submit" value="target">Find layout</button></form>
 <div id="capacity-result" aria-live="polite"></div>
 </section>
-</main><script type="module" src="/src/main.js"></script></body></html>
+</main>
+<dialog class="product-tour" id="product-tour" aria-labelledby="product-tour-title">
+<div class="product-tour-heading"><div><h2 id="product-tour-title">Components of the X500 frame</h2><p>X500 V2-inspired exploded view</p></div><form method="dialog"><button aria-label="Close component introduction">Close</button></form></div>
+<div class="product-tour-content"><div id="product-scene"></div><div class="product-tour-side">
+<div id="product-parts" class="product-parts" aria-label="Frame and kit components"></div>
+<div class="product-tour-selection" aria-live="polite"><h3 id="product-part-name"></h3><p id="product-part-work"></p></div>
+</div></div>
+<div class="product-tour-controls"><label for="product-explosion">Explode <output id="product-spread" for="product-explosion">80%</output></label><input id="product-explosion" type="range" min="0" max="100" value="80"><button id="product-assemble" type="button">Assemble</button><button id="product-explode" type="button">Explode fully</button></div>
+<div class="product-tour-footer"><p>Drag to rotate. Select a component to follow it into the station.</p><button class="primary" id="product-to-station" type="button">Show in assembly station</button></div>
+</dialog>
+<script type="module" src="/src/main.js"></script></body></html>

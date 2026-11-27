@@ -1,7 +1,8 @@
 import './style.css';
 import {Cell,faults} from './cell.js';
 import {createView} from './scene.js';
-import {compare} from './capacity.js';
+import {chooseLayout,compare,configurations} from './capacity.js';
+import {initProductTour} from './product-tour.js';
 
 const byId=id=>document.getElementById(id);
 for(const [key,[label]] of Object.entries(faults)) byId('fault').add(new Option(label,key));
@@ -9,12 +10,13 @@ let view;
 try {view=createView(byId('scene'));}
 catch(error) {
   console.error(error);
-  byId('scene').textContent='3D rendering requires WebGL. Cycle controls and shift planning are available.';
+  byId('scene').textContent='The 3D view is unavailable. Cycle controls and shift planning are still available.';
 }
 let cell;
 let last=-1;
 let rendered=0;
 let lastRefresh=0;
+let activePlan;
 function reset() {
   cell=new Cell({auto:byId('mode').value==='auto',fault:byId('fault').value,guided:true});
   rendered=-1;
@@ -28,6 +30,8 @@ function refresh() {
   }[cell.status];
   byId('time').textContent=cell.time.toFixed(1)+' s';
   byId('joints').textContent=cell.accepted.size+' / 16';
+  byId('input-kits').textContent=cell.stock.frames;
+  byId('good-output').textContent=cell.output;
   byId('op').textContent=cell.status==='complete'?'Accepted frame at output':
     cell.status==='ready'?'Ready to start':op?.label+(op?.joint!==undefined?' · J'+String(op.joint+1).padStart(2,'0'):'');
   byId('bar').style.width=(op?100*cell.elapsed/op.duration:100)+'%';
@@ -69,7 +73,10 @@ byId('reset').onclick=()=>{
 };
 byId('estop').onclick=()=>{cell.emergencyStop();refresh();};
 byId('ack').onclick=()=>{cell.acknowledgeStop();refresh();};
-byId('mode').onchange=reset;
+byId('mode').onchange=()=>{
+  reset();
+  if (activePlan) calculatePlan('estimate',false);
+};
 byId('fault').onchange=reset;
 byId('confirm').onclick=()=>{cell.confirm();refresh();};
 byId('access').onclick=()=>{
@@ -77,36 +84,97 @@ byId('access').onclick=()=>{
   refresh();
 };
 byId('recover').onclick=()=>{cell.recover();refresh();};
-for(const [key,label] of [['top','Overhead'],['iso','Isometric'],['focus','Fixture close-up']])
-  byId(key).onclick=()=>{
-    view?.setCamera(key);
-    byId('camera-label').textContent=label;
-    for(const viewName of ['top','iso','focus']) byId(viewName).setAttribute('aria-pressed',String(viewName===key));
-  };
+const cameraNames={top:'Overhead',iso:'Isometric',focus:'Fixture close-up',plan:'Shift layout'};
+function selectCamera(key) {
+  view?.setCamera(key);
+  byId('camera-label').textContent=cameraNames[key];
+  for (const name of Object.keys(cameraNames)) {
+    byId(name).setAttribute('aria-pressed',String(name===key));
+  }
+  const planning=key==='plan';
+  byId('shift-layout-details').hidden=!planning;
+  byId('station-legend').hidden=planning;
+  byId('gate').hidden=planning;
+  byId('part-guide').hidden=planning || !byId('guide-part').textContent;
+}
+for (const key of ['top','iso','focus']) byId(key).onclick=()=>selectCamera(key);
+
+initProductTour({onShowPart(part) {
+  byId('guide-part').textContent=part.name;
+  byId('guide-operation').textContent=part.work;
+  view?.highlight(part.station);
+  selectCamera('top');
+  byId('station').focus({preventScroll:true});
+  byId('station').scrollIntoView({block:'nearest'});
+}});
+byId('clear-guide').onclick=()=>{
+  view?.highlight(null);
+  byId('guide-part').textContent='';
+  byId('part-guide').hidden=true;
+  byId('station').focus({preventScroll:true});
+};
 byId('export').onclick=()=>{
   const url=URL.createObjectURL(new Blob([JSON.stringify(cell.report(),null,2)],{type:'application/json'}));
   const link=document.createElement('a');link.href=url;link.download='x500-run.json';link.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
-byId('capacity').onsubmit=e=>{
-  e.preventDefault();
-  const target=Number(byId('target').value);
-  const rows=compare(target,Number(byId('minutes').value),byId('mode').value==='auto');
-  const preferred=rows.find(row=>row.shortfall===0);
-  const message=preferred?
-    `${preferred.cells} cell(s) with ${preferred.operators} operator(s) met demand in all five modeled runs.`:
-    'No evaluated configuration met demand in all five modeled runs.';
-  byId('capacity-result').innerHTML=`<p>${message} Fault-free planning estimate, independent of the selected demo fault. Assumes 20 s of operator replenishment and pallet service every two frames. Five seeded samples vary assumed operation times by ±15%.</p>
+const capacity=byId('capacity');
+const configuration=byId('configuration');
+for (const [cells,operators] of configurations) {
+  configuration.add(new Option(`${cells} / ${operators}`,`${cells}:${operators}`));
+}
+
+function calculatePlan(request,showLayout) {
+  const targetInput=byId('target');
+  targetInput.required=request==='target';
+  if (!capacity.reportValidity()) return;
+  const target=targetInput.value==='' ? null : Number(targetInput.value);
+  const minutes=Number(byId('minutes').value);
+  const rows=compare(target,minutes,cell.auto);
+  const chosen=request==='target' ? chooseLayout(rows) :
+    rows.find(row=>`${row.cells}:${row.operators}`===configuration.value);
+  configuration.value=`${chosen.cells}:${chosen.operators}`;
+  activePlan=chosen;
+  view?.setLayout(chosen);
+  byId('layout-title').textContent=`${chosen.cells} assembly ${chosen.cells===1?'cell':'cells'} · ${chosen.operators} shared ${chosen.operators===1?'operator':'operators'}`;
+  byId('layout-output').textContent=`${chosen.nominal} nominal good frames in ${minutes} min · ${chosen.waitingMinutes.toFixed(1)} min total operator wait`;
+  const bays=chosen.bays.map((bay,index)=>{
+    const item=document.createElement('li');
+    item.textContent=`Cell ${index+1} · ${bay.good} good frames · ${(bay.wait/60).toFixed(1)} min waiting`;
+    return item;
+  });
+  byId('layout-bays').replaceChildren(...bays);
+  const message=target===null ? `The selected layout produced ${chosen.nominal} good frames in the nominal shift.` :
+    chosen.shortfall===0
+    ? `The selected layout met the ${target}-frame target in all five modeled shifts.`
+    : request==='target'
+      ? `No evaluated layout met the target in all five modeled shifts. The closest layout was ${chosen.shortfall} frames short in its lowest-output sample.`
+      : `The selected layout was ${chosen.shortfall} frames short in its lowest-output sample.`;
+  byId('capacity-result').innerHTML=`<p>${message} The layout labels show nominal accepted output by cell. Five seeded samples vary assumed operation times by ±15%. Faults are excluded from the estimate. Replenishment and pallet service use 20 s of operator time every two frames.</p>
     <table><thead><tr><th>Cells</th><th>Operators</th><th>Nominal good</th><th>Sample range</th><th>Shortfall at low sample</th><th>Nominal operator wait</th></tr></thead><tbody>${
-      rows.map(r=>`<tr class="${r===preferred?'recommended':''}"><td>${r.cells}</td><td>${r.operators}</td><td>${r.nominal}</td><td>${r.min}–${r.max}</td><td>${r.shortfall}</td><td>${r.waitingMinutes.toFixed(1)} min</td></tr>`).join('')
+      rows.map(row=>`<tr aria-current="${row===chosen}"><td>${row.cells}</td><td>${row.operators}</td><td>${row.nominal}</td><td>${row.min}–${row.max}</td><td>${row.shortfall??'–'}</td><td>${row.waitingMinutes.toFixed(1)} min</td></tr>`).join('')
     }</tbody></table>`;
+  if (showLayout) {
+    selectCamera('plan');
+    byId('station').focus({preventScroll:true});
+    byId('station').scrollIntoView({block:'start'});
+  }
+}
+capacity.onsubmit=event=>{
+  event.preventDefault();
+  calculatePlan(event.submitter?.value,true);
+};
+byId('plan').onclick=()=>{
+  if (activePlan) selectCamera('plan');
+  else calculatePlan('estimate',true);
 };
 reset();
+view?.animate(cell);
 function frame(now) {
   const dt=last<0?0:Math.min(.12,(now-last)/1000);
   last=now;
   cell.tick(dt*Number(byId('speed').value));
-  view?.animate(cell);
+  view?.animate(cell,now);
   if(now-lastRefresh>=100 || rendered!==cell.history.length) {
     refresh();
     lastRefresh=now;

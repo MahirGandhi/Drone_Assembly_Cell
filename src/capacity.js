@@ -1,6 +1,6 @@
 import {makeCycle} from './cell.js';
 
-const configurations=[[1,1],[2,1],[2,2],[3,1],[3,2],[4,2]];
+export const configurations=[[1,1],[2,1],[2,2],[3,1],[3,2],[4,2]];
 const seeds=[17,83,131,269,457];
 const serviceEvery=2;
 const serviceSeconds=20;
@@ -12,9 +12,9 @@ export function simulateShift({cells,operators,seconds,auto,seed,variation}) {
     return rng/2**32;
   };
   const route=makeCycle(auto);
-  const states=Array.from({length:cells},()=>({time:0,step:0,good:0}));
+  const states=Array.from({length:cells},()=>({time:0,step:0,good:0,wait:0}));
   const staff=Array(operators).fill(0);
-  let wait=0, work=0, events=0;
+  let work=0, events=0;
   while (true) {
     const cell=states.reduce((a,b)=>a.time<=b.time?a:b);
     if(cell.time>=seconds) break;
@@ -27,7 +27,7 @@ export function simulateShift({cells,operators,seconds,auto,seed,variation}) {
       const worker=staff.indexOf(Math.min(...staff));
       start=Math.max(start,staff[worker]);
       staff[worker]=start+duration;
-      wait+=Math.max(0,Math.min(start,seconds)-cell.time);
+      cell.wait+=Math.max(0,Math.min(start,seconds)-cell.time);
       work+=Math.max(0,Math.min(duration,seconds-start));
     }
     const end=start+duration;
@@ -39,17 +39,25 @@ export function simulateShift({cells,operators,seconds,auto,seed,variation}) {
       if(cell.good%serviceEvery!==0) cell.step=0;
     }
   }
-  return {good:states.reduce((total,c)=>total+c.good,0),wait,work,events};
+  const bays=states.map(({good,wait})=>({good,wait}));
+  return {good:bays.reduce((sum,bay)=>sum+bay.good,0),
+    wait:bays.reduce((sum,bay)=>sum+bay.wait,0),work,events,bays};
 }
 
 export function compare(target,minutes,auto) {
-  if(!Number.isInteger(target)||target<1||target>2000||
+  if((target!==null&&(!Number.isInteger(target)||target<1||target>2000))||
      !Number.isInteger(minutes)||minutes<1||minutes>720) throw new RangeError('Invalid demand or shift time');
   return configurations.map(([cells,operators])=>{
     const input={cells,operators,seconds:minutes*60,auto};
     const nominal=simulateShift({...input,seed:seeds[0],variation:0});
     const runs=seeds.map(seed=>simulateShift({...input,seed,variation:.15}).good);
     return {cells,operators,nominal:nominal.good,min:Math.min(...runs),max:Math.max(...runs),
-      shortfall:Math.max(0,target-Math.min(...runs)),waitingMinutes:nominal.wait/60};
+      shortfall:target===null ? null : Math.max(0,target-Math.min(...runs)),waitingMinutes:nominal.wait/60,bays:nominal.bays};
   });
+}
+
+// The catalogue is ordered by cell count, then shared-operator count.
+export function chooseLayout(rows) {
+  return rows.find(row=>row.shortfall===0) ??
+    rows.reduce((best,row)=>row.shortfall<best.shortfall ? row : best);
 }
