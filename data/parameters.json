@@ -201,10 +201,10 @@
     },
     {
       "id": "simready_asset_commit",
-      "value": null,
+      "value": "dde58cf7c1d74896c2116a6c14a3a851bc5b58a7",
       "unit": "commit",
-      "evidence_status": "unknown",
-      "source": null,
+      "evidence_status": "source-fact",
+      "source": "NVIDIA-SIMREADY",
       "resolution_task": "S3.1",
       "impact": "asset reproducibility"
     }

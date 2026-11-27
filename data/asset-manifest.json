@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "supply-crate",
+  "role": "replenishment_bin",
+  "source": {
+    "publisher": "NVIDIA",
+    "repository": "https://huggingface.co/datasets/nvidia/simready-assets",
+    "revision": "dde58cf7c1d74896c2116a6c14a3a851bc5b58a7",
+    "rootUsd": "crate_black_a02/simready_usd/sm_crate_black_a02_01.usd",
+    "license": "CC-BY-4.0"
+  },
+  "browser": {
+    "path": "public/models/simready-crate.json",
+    "url": "./models/simready-crate.json",
+    "sha256": "cf36bf0ee31f7d0d59efa210c817d3ff14019bf1d819aa862b474d23f1bfc624",
+    "bytes": 184236,
+    "vertices": 2892,
+    "triangles": 7472,
+    "bounds": {
+      "min": [
+        -0.294899,
+        -0.000455,
+        -0.198633
+      ],
+      "max": [
+        0.294899,
+        0.22219,
+        0.198633
+      ]
+    },
+    "upAxis": "Y",
+    "sceneUnits": "metres",
+    "dimensionEvidence": "resized display geometry; physical crate dimensions unverified",
+    "changes": [
+      "geometry conversion",
+      "reorientation",
+      "resizing",
+      "triangulation",
+      "simplification",
+      "replacement material"
+    ],
+    "omitted": [
+      "source hierarchy",
+      "material bindings and textures",
+      "physics properties",
+      "collision shapes",
+      "semantics"
+    ],
+    "conversionReproducible": false
+  },
+  "nativeValidation": {
+    "status": "pending",
+    "reason": "Native package dependencies, authored units and profiles have not been validated in this project."
+  }
+}

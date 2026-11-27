@@ -4,6 +4,7 @@ import geometry from '../data/reference-geometry.json';
 import {gripFraction,jointOrder,parts} from './cell.js';
 import {SVGObject} from 'three/addons/renderers/SVGRenderer.js';
 import {makeRenderer} from './renderer.js';
+import asset from '../data/asset-manifest.json';
 
 const V=(x,y,z)=>new T.Vector3(x,y,z);
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -35,7 +36,7 @@ function setLine(mesh,a,b) {
   mesh.quaternion.setFromUnitVectors(V(0,1,0),vec.normalize());
 }
 
-export function createView(host) {
+export function createView(host,onAssetStatus=()=>{}) {
   const scene=new T.Scene();
   scene.background=new T.Color(0x30363c);
   const {renderer,webgl}=makeRenderer(host,scene,1.45);
@@ -200,15 +201,26 @@ export function createView(host) {
   const bin=new T.Group();bin.position.set(-2.93,0,-1.12);station.add(bin);
   box(bin,0,.10,0,.59,.2,.42,blue);
   box(bin,0,.203,0,.52,.005,.35,rubber);
-  fetch('./models/simready-crate.json').then(r=>r.ok?r.json():null).then(mesh=>{
-    if(!mesh) return;
+  onAssetStatus('Loading supply crate…');
+  fetch(asset.browser.url).then(response=>{
+    if (!response.ok) throw new Error('Supply crate failed to load');
+    return response.json();
+  }).then(mesh=>{
+    if (!Array.isArray(mesh.positions)||!Array.isArray(mesh.indices)||
+      mesh.positions.length!==asset.browser.vertices*3||mesh.indices.length!==asset.browser.triangles*3) {
+      throw new Error('Supply crate geometry does not match the recorded asset');
+    }
     bin.clear();
     const g=new T.BufferGeometry();
     g.setAttribute('position',new T.Float32BufferAttribute(mesh.positions,3));
     g.setIndex(mesh.indices);g.computeVertexNormals();
     solid(bin,g,blue,0,0,0);
     needsRender=true;
-  }).catch(()=>{});
+    onAssetStatus('Supply crate loaded · display geometry');
+  }).catch(error=>{
+    console.error(error);
+    onAssetStatus('Supply crate unavailable · placeholder shown');
+  });
   // Screw rack and tool dock.
   box(station,1.35,.9,-.7,.43,.075,.33,dark);
   const feeder=jointLocations.map((_,i)=>V(1.2+i%4*.092,.953,-.82+Math.floor(i/4)*.07));

@@ -8,7 +8,7 @@ const byId=id=>document.getElementById(id);
 byId('open-about').addEventListener('click', () => byId('about-station').showModal());
 for(const [key,[label]] of Object.entries(faults)) byId('fault').add(new Option(label,key));
 let view;
-try {view=createView(byId('scene'));}
+try {view=createView(byId('scene'),message=>{byId('asset-status').textContent=message;});}
 catch(error) {
   console.error(error);
   byId('scene').textContent='The 3D view is unavailable. Cycle controls and shift planning are still available.';

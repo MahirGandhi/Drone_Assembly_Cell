@@ -141,3 +141,5 @@ canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 
 .kpi-method { margin-top: 12px; }
 .kpi-method summary { cursor: pointer; font-size: 13px; color: #c4d0dc; }
+
+.asset-status { background:#10151be8; border:1px solid #4a5360; border-radius:5px; padding:5px 8px; color:#becbd6; font-size:12px; }
