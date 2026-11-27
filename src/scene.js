@@ -166,7 +166,7 @@ export function createView(host,onAssetStatus=()=>{}) {
   }
   const objects={};
   const inputs={
-    base:V(-2.05,.888,.18),top:V(-2.05,.899,.53),
+    base:V(-2.05,1.11,.18),top:V(-2.05,.899,.53),
     arm0:V(-1.8,.895,-.03),arm1:V(-1.47,.895,-.03),arm2:V(-1.8,.895,.56),arm3:V(-1.47,.895,.56)
   };
   const placement={base:V(fx,fy,fz),top:V(fx,fy+.032,fz)};
@@ -175,6 +175,18 @@ export function createView(host,onAssetStatus=()=>{}) {
     objects[key]=plate(.032,.002);
     station.add(objects[key]);
   }
+  // Concept envelopes for the prepared lower assembly. Current kit fit remains an open CAD gate.
+  for (const sign of [-1,1]) {
+    line(objects.base,V(sign*.048,-.025,-.125),V(sign*.048,-.025,.125),.005,steel);
+    for (const z of [-.077,.077]) {
+      line(objects.base,V(sign*.061,-.012,z),V(sign*.129,-.215,z),.006,carbon);
+      box(objects.base,sign*.061,-.012,z,.024,.014,.022,dark);
+      box(objects.base,sign*.129,-.215,z,.022,.014,.022,dark);
+    }
+    line(objects.base,V(sign*.129,-.215,-.15),V(sign*.129,-.215,.15),.005,carbon);
+  }
+  box(objects.base,0,.006,0,.047,.007,.053,blue);
+  box(objects.base,0,-.029,.038,.10,.004,.15,carbon);
   for(let i=0;i<4;i++){
     const obj=new T.Group();station.add(obj);
     line(obj,V(0,0,0),V(.17,0,0),.008,carbon);
@@ -191,6 +203,13 @@ export function createView(host,onAssetStatus=()=>{}) {
     box(obj,-.044,-.008,.014,.01,.006,.009,yellow);
     objects['arm'+i]=obj;
     placement['arm'+i]=V(fx+Math.cos(angles[i])*.076,fy+.016,fz+Math.sin(angles[i])*.076);
+  }
+  // Raised nests leave the modeled 215 mm landing gear above the bench.
+  for (const [x,z,height] of [[-2.05,.18,1.11],[fx+1.68,fz+.13,fy]]) {
+    for (const dx of [-.035,.035]) for (const dz of [-.035,.035]) {
+      box(station,x+dx,(height+.89)/2,z+dz,.014,height-.89,.014,steel);
+      box(station,x+dx,height-.003,z+dz,.022,.006,.022,dark);
+    }
   }
   const inputTray=V(-1.68,.868,.38);
   box(station,inputTray.x,inputTray.y,inputTray.z,1.25,.023,.9,blue);
@@ -467,7 +486,7 @@ export function createView(host,onAssetStatus=()=>{}) {
     const f=op?clamp(cell.elapsed/op.duration,0,1):0;
     const delivery=op?.key==='unload'?1:.8;
     const carry=clamp((f-gripFraction)/(delivery-gripFraction),0,1);
-    const outputOffset=V(1.68,-.16,.13);
+    const outputOffset=V(1.68,0,.13);
     const transfer=V(0,0,0);
     if (cell.parts.top==='output') transfer.copy(outputOffset);
     else if (op?.key==='unload' && executing) {

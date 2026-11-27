@@ -27,6 +27,7 @@ let speed=Number(byId('speed').value);
 let rendered=0;
 let lastRefresh=0;
 let activePlan;
+let activeStudy;
 let shiftPlaying=false;
 let shiftTime=0;
 let shiftLast;
@@ -180,6 +181,12 @@ byId('export').onclick=()=>{
   const link=document.createElement('a');link.href=url;link.download='x500-run.json';link.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
+byId('export-study').onclick=()=>{
+  if (!activeStudy) return;
+  const url=URL.createObjectURL(new Blob([JSON.stringify(activeStudy,null,2)],{type:'application/json'}));
+  const link=document.createElement('a');link.href=url;link.download='assembly-shift-study.json';link.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
 const capacity=byId('capacity');
 const configuration=byId('configuration');
 for (const [cells,operators] of configurations) {
@@ -199,6 +206,12 @@ function calculatePlan(request,showLayout) {
     rows.find(row=>`${row.cells}:${row.operators}`===configuration.value);
   configuration.value=`${chosen.cells}:${chosen.operators}`;
   activePlan=chosen;
+  activeStudy={schemaVersion:1,createdAt:new Date().toISOString(),target,minutes,auto:cell.auto,
+    production,selected:{cells:chosen.cells,operators:chosen.operators},recipe:cell.report().recipe,
+    operationTimes:cell.cycle,sourceAssetRevision:asset.source.revision,sourceAssetDigest:asset.browser.sha256,
+    timingSeeds:[17,83,131,269,457],variation:.15,results:rows,
+    evidence:'Modeled inputs and results. Physical qualification remains pending.'};
+  byId('export-study').disabled=false;
   shiftPlaying=false;
   shiftTime=0;
   byId('shift-time').max=minutes*60;

@@ -54,6 +54,7 @@ export function makeCycle(auto) {
 
 export class Cell {
   constructor({auto=true, fault='', guided=false}={}) {
+    this.runId=globalThis.crypto.randomUUID();
     this.auto=auto;
     this.guided=guided;
     this.fault=fault;
@@ -297,7 +298,7 @@ export class Cell {
     return true;
   }
   report() {
-    return {recipe,auto:this.auto,guided:this.guided,status:this.status,serial:this.serial,time:this.time,stock:this.stock,
+    return {schemaVersion:2,runId:this.runId,recipe,auto:this.auto,guided:this.guided,status:this.status,serial:this.serial,time:this.time,stock:this.stock,
       parts:this.parts,retainedNuts:this.nuts,lostNuts:this.lostNuts,output:this.output,scrap:this.scrap,joints:this.attempts,events:this.history};
   }
 }

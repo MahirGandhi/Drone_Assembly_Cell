@@ -47,6 +47,7 @@
         <div class="actions">
           <button type="submit" value="estimate">Estimate output</button>
           <button type="submit" value="target">Find layout</button>
+          <button type="button" id="export-study" disabled>Export shift study</button>
         </div>
       </form>
       <details class="production-inputs"><summary>Material supply and quality assumptions</summary>
@@ -66,6 +67,11 @@
         <output id="shift-clock">0.0 min</output>
       </div>
     </section>
+    <details class="engineering-status">
+      <summary>Fixture and assembly evidence</summary>
+      <p>The prepared lower assembly includes mounting rails, landing gear, a battery deck and power-board envelopes. Sixteen joint axes come from the reference STEP. The fixture, clamps and tool remain concepts.</p>
+      <p>Open gate: the reference CAD reports four intersections at upper-plate seating. Sixteen idealized tool probes cleared the plate and arms; actual driver, clamps, wiring and extraction still need checking. No qualified tightening torque is assigned.</p>
+    </details>
     <details class="supply-controls" id="supply-study">
       <summary>Supply-bin placement study</summary>
       <form id="supply-layout">
@@ -74,7 +80,7 @@
         <button type="submit" disabled>Check access</button>
       </form>
       <p id="supply-result" role="status"></p>
-      <p>The outlined box marks assumed operator-access space at the gate. Red indicates insufficient clearance. This check compares the resized crate’s bounding box with that space. Required gap is a design input. Physical bin dimensions and access requirements need measurement.</p>
+      <p>The outlined box marks assumed operator-access space at the gate. Red indicates insufficient clearance. This check compares the simplified vendor crate’s bounding box with that space. Required gap is a design input. Physical bin dimensions and access requirements need measurement.</p>
     </details>
   </section>
 
