@@ -28,3 +28,17 @@ The app opens on the live overhead station. **Explore components** opens an X500
 Change **Handling** or **Scenario** before starting a cycle to see the corresponding operation sequence or hold. **Estimate output** shows the selected cell and operator layout. **Find layout** selects the smallest evaluated layout that meets the entered target across all five samples, or reports the closest result. **Top** returns to the live cell.
 
 [Prototype coverage and engineering limits](docs/engineering/virtual-prototype.md).
+
+## Production studies
+
+Open **Material supply and quality assumptions** to set kit and pallet capacities, delivery/collection intervals and a rework scenario. Zero interval uses on-demand operator service. Positive intervals represent external scheduled logistics. Repairs include recheck and recover all affected frames under the selected assumption. **Play shift** and its time slider show per-cell activity, waits and cumulative output from computed events. **Export shift study** saves inputs, timings, seeds and results.
+
+Operator work is wrapped in modeled parking, access, exit, reset and deliberate restart. The guided option requires individual confirmations. Default playback simulates those commands. Resource scheduling reserves a worker for the whole visit.
+
+## Native asset reproduction
+
+Install usd-core 26.11 in an isolated Python environment and use Blender 4.3.2 for the recorded export. Run python scripts/native_asset.py, then npm run check:assets.
+
+The script fetches only the pinned crate package, verifies each file against its published BOM, composes a metric root-referenced stage and records dependencies and static clearance controls. Vendor files and the generated station USD stay in ignored assets/local-source/simready-crate/. The report and browser mesh are versioned. The export rotates native Z-up geometry into Y-up and checks simplified bounds within 2 mm of the native envelope.
+
+NVIDIA profile validation, contact simulation, current-kit fit, tooling qualification and physical production measurements remain open. The on-screen evidence panel and data/acceptance-matrix.json distinguish software checks from physical qualification.

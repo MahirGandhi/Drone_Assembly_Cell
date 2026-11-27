@@ -18,7 +18,11 @@ The modeled output pallet must have room before the unload starts. During unload
 
 The 3D arm is an articulated display model. Its geometry and paths are provisional. Plate and arm meshes are independently drawn visualization proxies. The fixture view uses STEP-derived coordinates for the sixteen joint markers. Plate closure in the browser is an assumed animation. The previously reported STEP intersections remain unresolved. The modeled driver feedback uses scripted events rather than torque or force measurements.
 
-Capacity uses the same operation duration list as the interactive simulation. A scheduled operator performs manual operations and a service stop of 20 s after every two frames. In each planning run, each completed route counts as good. Fault scenarios and corrective actions are available in the cycle demo. They are excluded from the shift estimates. A configuration ranking is conditional on five fixed timing samples and the available-time input. The shift layout is a static overhead arrangement of the same station. Each bay label shows nominal accepted output from the capacity model, and the plan reports aggregate operator wait. The live cycle in the original station remains available from **Top**. The assembly-cell layout is a visualization of the modeled configuration and does not qualify factory footprint or service access.
+Capacity uses the same operation route as the interactive cell, including access and restart work. A worker is reserved for the full visit. Finite kits and pallets, logistics timing and rework affect throughput. Repairs are a declared scenario that recovers affected frames. Shift playback uses computed event intervals and accepted-output timestamps. Detailed fault scenarios remain separate from the shift quality-rate assumption.
+
+The normal routes total 192.6 modeled seconds with robot handling and 220.6 with operator handling. These are assumed work contents. Guided interaction pauses simulation time while awaiting the user. Actual factory waiting needs measurement.
+
+The native crate workflow opens the pinned vendor root with usd-core 26.11, verifies package files, composes a metric Z-up stage and checks two clearance controls. A reproducible Blender export generates the browser mesh. data/native-asset-report.json records dependency resolution, schemas and bounds. NVIDIA profile validation and physics remain pending.
 
 ## Environment mesh attribution
 

@@ -1,125 +1,260 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "checks": [
     {
       "id": "V01",
       "requirement": "Product and asset provenance",
       "expected": "Every engineering model and important parameter has a source/status; proxies and unknowns are visible.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "data/asset-manifest.json",
+        "data/native-asset-report.json"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V02",
       "requirement": "Coordinate consistency",
       "expected": "Reference dimensions and transforms agree; no hidden unit-scale errors.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "scripts/native_asset.py",
+        "scripts/check-assets.js",
+        "data/reference-geometry.json"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V03",
       "requirement": "Assembly access",
       "expected": "Each part insertion, nut retention, fastening approach and finished-product extraction is explained and geometrically supported.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "docs/engineering/reference-access.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V04",
       "requirement": "Normal cycle",
       "expected": "One frame follows the complete approved route and produces a coherent record.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V05",
       "requirement": "Material balance",
       "expected": "Initial stock + receipts = final stock + consumption/scrap, with no negative quantities or duplicate part ownership.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V06",
       "requirement": "Fastener completeness",
       "expected": "Every required unique joint has the correct accepted attempt; duplicates/missing locations cannot satisfy the requirement.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V07",
       "requirement": "Tool and fixture permissions",
       "expected": "Wrong/unlocked tool or absent clamp feedback inhibits the relevant action.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V08",
       "requirement": "Missing/wrong material",
       "expected": "The cell holds/waits through a justified detector or incoming check; no magical substitution occurs.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V09",
       "requirement": "Fastening failures",
       "expected": "Approved fault scenarios lead to hold/rework, preserving original and subsequent attempt records.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V10",
       "requirement": "Access/stop/restart",
       "expected": "Stop behavior preserves product state; reset or access closure alone cannot restart automatic work.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V11",
       "requirement": "Replenishment/operator contention",
       "expected": "Empty stock and shared service consume actual modeled waiting and operator time.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V12",
       "requirement": "Blocked output",
       "expected": "Product remains supported and unavailable capacity is reflected in results.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V13",
       "requirement": "Replay and reproducibility",
       "expected": "Identical configuration/seed yields identical process events/results; presentation frame rate does not alter them.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V14",
       "requirement": "Capacity accounting",
       "expected": "Good output, WIP, cycle times, downtime and utilization reconcile with the event history.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V15",
       "requirement": "Demand configuration",
       "expected": "Selected candidates satisfy the configured sample criterion or report shortfall; resources and constraints are disclosed.",
-      "status": "not-run"
+      "status": "software-verified",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V16",
       "requirement": "Browser/headless consistency",
       "expected": "The rendered view and non-rendered engine agree on production results for the same scenario.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V17",
       "requirement": "Input handling",
       "expected": "Invalid units, negative demand, inconsistent recipes, oversized runs and corrupted imports are rejected cleanly.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V18",
       "requirement": "Independent plausibility",
       "expected": "Deterministic time and simple resource bounds agree with hand checks; sensitivity is reported where inputs are uncertain.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "src/cell.test.js",
+        "src/production.test.js",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V19",
       "requirement": "Deployment reproducibility",
       "expected": "A clean checkout/build identifies the deployed commit, model revision and available example scenarios.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "package.json",
+        "docs/reviews/production-upgrade.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     },
     {
       "id": "V20",
       "requirement": "Claim accuracy",
       "expected": "Portfolio wording distinguishes a virtual station, verified logic/geometry and any genuinely completed physical validation.",
-      "status": "not-run"
+      "status": "partial-evidence",
+      "evidence": [
+        "docs/reviews/production-upgrade.md",
+        "docs/reviews/factory-readiness.md"
+      ],
+      "physical_qualification": "pending",
+      "scope": "Scripted software and declared model inputs. Physical commissioning and production capability are unverified."
     }
   ]
 }
