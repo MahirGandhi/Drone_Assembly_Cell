@@ -69,6 +69,7 @@ export function createProductView(host, onSelect) {
   controls.maxZoom = 4;
   let hostVisible = true;
   let selected = null;
+  let isolated = false;
   let amount = .8;
   let targetAmount = .8;
   let animation = 0;
@@ -243,7 +244,14 @@ export function createProductView(host, onSelect) {
     for (const object of partsById.get(selected) ?? []) object.material = object.userData.finish;
     for (const object of partsById.get(id) ?? []) object.material = selectedMaterial;
     selected = id;
+    updateIsolation();
     needsRender = true;
+  }
+
+  function updateIsolation() {
+    for(const {group} of objects) group.visible=!isolated||group.children.some(child=>child.userData.partId===selected);
+    aids.visible=!isolated&&amount>.07;
+    needsRender=true;
   }
 
   const ray = new THREE.Raycaster();
@@ -259,7 +267,7 @@ export function createProductView(host, onSelect) {
     if (Math.hypot(event.clientX-x,event.clientY-y)>6) return;
     const bounds = renderer.domElement.getBoundingClientRect();
     ray.setFromCamera(new THREE.Vector2((x-bounds.left)/bounds.width*2-1,1-(y-bounds.top)/bounds.height*2),camera);
-    const [hit] = ray.intersectObjects(scene.children,true).filter(result => result.object.userData.partId);
+    const [hit] = ray.intersectObjects(objects.filter(item=>item.group.visible).map(item=>item.group),true).filter(result => result.object.userData.partId);
     if (hit) onSelect(hit.object.userData.partId);
   });
 
@@ -279,7 +287,7 @@ export function createProductView(host, onSelect) {
     if (remaining !== 0) {
       amount = !webgl || reducedMotion.matches || Math.abs(remaining)<.001 ? targetAmount : amount + remaining*.17;
       for (const {group,position,offset} of objects) group.position.copy(position).addScaledVector(offset,amount);
-      aids.visible = amount>.07;
+      aids.visible = !isolated&&amount>.07;
       for (const guide of guides) updateGuide(guide);
       needsRender = true;
     }
@@ -306,5 +314,5 @@ export function createProductView(host, onSelect) {
   fit();
   setCamera('iso');
   animation = requestAnimationFrame(render);
-  return {setCamera,select,setVisible,setExplosion(value) { targetAmount = value; }};
+  return {setCamera,select,setVisible,setIsolation(value) {isolated=value;updateIsolation();},setExplosion(value) { targetAmount = value; }};
 }

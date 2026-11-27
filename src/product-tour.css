@@ -5,7 +5,7 @@ header .header-tools {
 }
 
 .product-tour {
-  width: min(960px, calc(100% - 24px));
+  width: min(1180px, calc(100% - 24px));
   max-height: calc(100dvh - 24px);
   overflow: auto;
   border: 1px solid #4a5766;
@@ -94,6 +94,16 @@ header .header-tools {
   margin-top: 4px;
   color: #bac6d2;
 }
+
+.product-view-tools { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 8px 16px; border-top: 1px solid #303846; }
+.product-view-tools > div { display: flex; gap: 5px; }
+.product-view-tools label { display: flex; align-items: center; gap: 7px; }
+.product-view-tools input { accent-color: #c4ec8b; }
+.stage-tag { margin-left: auto; font-size: 11px; color: #bad2da; border: 1px solid #435b67; border-radius: 4px; padding: 4px 7px; }
+.product-filter { padding: 9px 9px 0; }
+.product-tour-heading .eyebrow { color: #c4ec8b; font-size: 10px; margin-bottom: 6px; }
+.product-tour-heading h2 { font-size: 21px; font-weight: 600; }
+.product-tour-footer p { max-width: 68ch; line-height: 1.5; }
 
 .product-tour-controls {
   border-bottom: 1px solid #303846;

@@ -1,20 +1,28 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>X500 Assembly Cell</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Explore the X500 drone, follow frame assembly and compare manufacturing capacity, staffing and production losses."><title>X500 · Assembly Engineering</title></head>
 <body>
 <header>
-  <div class="brand"><span class="logo">✣</span><div><strong>X500 Assembly Cell</strong><small>Manufacturing simulation</small></div></div>
+  <div class="brand"><span class="logo" aria-hidden="true">✣</span><div><strong>X500</strong><small>Assembly engineering</small></div></div>
   <div class="header-tools">
-    <span class="context">Nominal geometry · Modeled cycle</span>
+    <span class="context">Virtual manufacturing study</span>
     <button id="open-product" type="button" aria-haspopup="dialog">Explore components</button>
     <button id="open-about" type="button" aria-haspopup="dialog" aria-controls="about-station">About</button>
   </div>
 </header>
+<section class="introduction" aria-labelledby="project-title">
+  <div class="intro-copy"><p class="eyebrow">PRODUCT → PROCESS → PRODUCTION</p><h1 id="project-title">How a drone becomes a repeatable build.</h1><p>Follow the parts into assembly. Run the cell, see where time is lost, and compare the resources needed to meet a production target.</p></div>
+  <nav class="project-path" aria-label="Explore the project">
+    <button type="button" data-open-product><span>01 · PRODUCT</span><strong>Understand the assembly</strong><small>Explode the drone and identify each part.</small></button>
+    <a href="#station-controls"><span>02 · PROCESS</span><strong>Watch one frame being built</strong><small>Follow the work, checks and recovery.</small></a>
+    <a href="#shift-title"><span>03 · PRODUCTION</span><strong>Change the production plan</strong><small>Compare output, labor and lost time.</small></a>
+  </nav>
+</section>
 <main>
-  <section class="controls" aria-label="Station controls">
+  <section class="controls" id="station-controls" aria-label="Station controls">
     <div class="cycle-controls">
       <div class="section-title">
-        <h1>Cell controls</h1>
+        <h2>Run the assembly</h2>
         <span id="status" role="status" data-state="ready">Ready</span>
         <button id="export">Export run record</button>
       </div>
@@ -40,7 +48,7 @@
       <h2 id="shift-title">Shift planning</h2>
       <form id="capacity" novalidate>
         <div class="shift-fields">
-          <label>Required good frames<input id="target" type="number" min="1" max="2000" value="120"></label>
+          <label>Required good frames<input id="target" type="number" min="1" max="2000" value="105"></label>
           <label>Available minutes<input id="minutes" type="number" min="1" max="720" value="420" required></label>
           <label>Cells / shared operators<select id="configuration"></select></label>
         </div>
@@ -129,12 +137,14 @@
   <p><strong>Shift planning</strong> compares cell layouts and staffing against a production target. It shows output and time spent waiting for an operator. Task times are assumptions, and shift estimates exclude faults.</p>
 </dialog>
 <dialog class="product-tour" id="product-tour" aria-labelledby="product-tour-title">
-<div class="product-tour-heading"><div><h2 id="product-tour-title">Components of the X500 frame</h2><p>X500 V2-inspired exploded view</p></div><form method="dialog"><button aria-label="Close component introduction">Close</button></form></div>
+<div class="product-tour-heading"><div><p class="eyebrow">01 · UNDERSTAND THE PRODUCT</p><h2 id="product-tour-title">One assembly. A purpose for every part.</h2><p>X500 V2-inspired geometry · Select a part to see what it does.</p></div><form method="dialog"><button aria-label="Close component introduction">Close</button></form></div>
+<div class="product-view-tools"><div role="group" aria-label="Product camera"><button id="product-iso" type="button" aria-pressed="true">Isometric</button><button id="product-top" type="button" aria-pressed="false">Top</button></div><label><input id="product-isolate" type="checkbox">Isolate selected part</label><span id="product-stage" class="stage-tag"></span></div>
 <div class="product-tour-content"><div id="product-scene"></div><div class="product-tour-side">
+<label class="product-filter">Component system<select id="product-filter"><option value="all">All components</option><option value="structure">Structure and hardware</option><option value="propulsion">Propulsion</option><option value="electronics">Power and electronics</option></select></label>
 <div id="product-parts" class="product-parts" aria-label="Frame and kit components"></div>
 <div class="product-tour-selection" aria-live="polite"><h3 id="product-part-name"></h3><p id="product-part-purpose"></p></div>
 </div></div>
 <div class="product-tour-controls"><label for="product-explosion">Explode <output id="product-spread" for="product-explosion">80%</output></label><input id="product-explosion" type="range" min="0" max="100" value="80"><button id="product-assemble" type="button">Assemble</button><button id="product-explode" type="button">Explode fully</button></div>
-<div class="product-tour-footer"><p>Drag to rotate. Select a component to follow it into the station.</p><button class="primary" id="product-to-station" type="button">Show in assembly station</button></div>
+<div class="product-tour-footer"><p id="product-process-context"></p><button class="primary" id="product-to-station" type="button">Follow into assembly →</button></div>
 </dialog>
 <script type="module" src="/src/main.js"></script></body></html>
