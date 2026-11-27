@@ -18,7 +18,7 @@ const task = (key, label, duration, resource, joint) => ({key, label, duration, 
 
 export function makeCycle(auto) {
   const handling = auto ? 'robot' : 'operator';
-  return [
+  const operations=[
     task('prepare','Load retained nuts',8,'operator'),
     ...parts.slice(0,5).map((p,i) => task(p,i ? 'Seat arm '+i : 'Seat lower plate',auto ? 4 : 8,handling)),
     task('wire','Park and inspect arm leads',16,'operator'),
@@ -35,6 +35,20 @@ export function makeCycle(auto) {
     task('undock','Return screwdriver',4,'robot'),
     task('unload','Transfer frame to output',auto ? 5 : 9,handling),
   ];
+  const route=[];
+  for (let index=0;index<operations.length;index++) {
+    const step=operations[index];
+    if (step.resource==='operator' && operations[index-1]?.resource!=='operator') {
+      route.push(task('park','Park tool and inhibit automatic motion',2,'robot'),
+        task('enter','Open access for operator work',2,'operator'));
+    }
+    route.push(step);
+    if (step.resource==='operator' && operations[index+1]?.resource!=='operator') {
+      route.push(task('exit','Operator exits and closes access',2,'operator'),
+        task('resetAccess','Verify access reset before automatic work',1,'fixture'));
+    }
+  }
+  return route;
 }
 
 export class Cell {
@@ -63,11 +77,16 @@ export class Cell {
     this.driver=false;
     this.inFlight=false;
     this.accessOpen=false;
+    this.operatorAccess=false;
     this.stopLatched=false;
     this.held=null;
     this.screw=null;
   }
   get op() {return this.cycle[this.index];}
+  get canStart() {
+    return ['ready','paused'].includes(this.status) && !this.stopLatched &&
+      (!this.accessOpen || (this.operatorAccess && this.op?.resource==='operator'));
+  }
   log(type, text, details={}) {
     this.history.push({time:+this.time.toFixed(3),serial:this.serial,type,text,...details});
   }
@@ -78,13 +97,17 @@ export class Cell {
     return true;
   }
   closeAccess() {
-    if (!this.accessOpen) return;
+    if (!this.accessOpen || (this.operatorAccess && ['running','waiting'].includes(this.status))) return false;
     this.accessOpen=false;
     this.log('access','Gate closed');
   }
   start() {
-    if (!['ready','paused'].includes(this.status) || this.accessOpen || this.stopLatched) return false;
+    if (!this.canStart) return false;
     const resumed=this.status==='paused';
+    if (this.operatorAccess && !this.accessOpen && this.op?.resource==='operator') {
+      this.accessOpen=true;
+      this.log('access','Stopped-state operator re-entry confirmed before resuming work');
+    }
     this.status='running';
     this.log('control',resumed?'Cycle resumed':'Cycle start');
     this.tick(0);
@@ -108,7 +131,7 @@ export class Cell {
     return true;
   }
   confirm() {
-    if (this.status!=='waiting' || this.accessOpen || this.stopLatched) return false;
+    if (this.status!=='waiting' || this.stopLatched || (this.accessOpen && !this.operatorAccess)) return false;
     this.status='running';
     this.log('operator','Operator authorized '+this.op.label.toLowerCase());
     return this.issue();
@@ -119,6 +142,15 @@ export class Cell {
     this.log('held',reason,this.held);
   }
   issue() {
+    if (this.accessOpen && this.op.resource!=='operator') {
+      this.trip('Automatic work inhibited while access is open');
+      return false;
+    }
+    if (this.op.resource==='operator' && !['enter'].includes(this.op.key) &&
+      (!this.accessOpen || !this.operatorAccess)) {
+      this.trip('Operator access has not been established');
+      return false;
+    }
     this.log('command',this.op.label,{joint:this.op.joint, recipe});
     if (this.op.key==='unload') {
       if (this.output>=this.outputLimit) {
@@ -179,6 +211,17 @@ export class Cell {
       return false;
     }
     let error;
+    if (key==='enter') {
+      this.accessOpen=true;
+      this.operatorAccess=true;
+      this.log('access','Modeled stopped-state feedback permits operator access');
+    }
+    if (key==='exit') {
+      this.accessOpen=false;
+      this.operatorAccess=false;
+      this.log('access','Operator exit and gate-closed feedback recorded');
+    }
+    if (key==='resetAccess' && this.accessOpen) error='Access is open';
     if (key==='prepare') {
       if (this.stock.frames<1 || this.stock.nuts<16 || this.stock.screws<16) error='Material shortage';
       else {this.stock.frames--;this.stock.nuts-=16;this.nuts.fill('fixture');}
@@ -242,6 +285,9 @@ export class Cell {
       this.log('rework','Discard rejected screw and restart this joint');
     }
     this.log('recovery','Operator confirmed corrective action. Close gate and restart.');
+    if (this.op?.resource==='operator' && this.op.key!=='enter' && !this.operatorAccess) {
+      this.index=this.cycle.findLastIndex((step,index)=>index<this.index && step.key==='enter');
+    }
     this.status='paused';
     this.held=null;
     return true;

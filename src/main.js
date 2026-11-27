@@ -55,13 +55,13 @@ function refresh() {
   byId('confirm').hidden=cell.status!=='waiting';
   byId('confirm').disabled=cell.stopLatched;
   if (cell.status==='waiting') byId('confirm').textContent='Confirm: '+op.label;
-  byId('recovery').hidden=cell.status!=='held'&&!cell.accessOpen;
+  byId('recovery').hidden=cell.status!=='held'&&(!cell.accessOpen||cell.operatorAccess)&&!cell.stopLatched;
   byId('reason').textContent=cell.held?.reason??'Close the gate before restarting.';
   byId('access').textContent=cell.accessOpen?'Close gate':'Open gate';
   byId('recover').disabled=!cell.accessOpen||cell.status!=='held';
   byId('gate').dataset.state=cell.stopLatched?'emergency':cell.status;
   byId('gate').textContent=cell.stopLatched?'Emergency stop latched · Acknowledge stop to enable restart':
-    cell.accessOpen?'Gate open · motion inhibited':
+    cell.accessOpen?(cell.operatorAccess?'Operator access open · automatic motion inhibited':'Gate open · motion inhibited'):
     cell.status==='waiting'?'Select Confirm in Cell controls to begin: '+op.label:
     cell.status==='held'?'Cycle held · '+cell.held.reason:
     cell.status==='paused'?'Paused · '+operation+' · '+cell.elapsed.toFixed(1)+' s into step':
@@ -72,7 +72,7 @@ function refresh() {
   byId('ack').disabled=!cell.stopLatched||cell.accessOpen;
   byId('reset').disabled=cell.stopLatched;
   byId('estop').disabled=cell.stopLatched||cell.status==='complete';
-  byId('run').disabled=cell.stopLatched||cell.accessOpen||['held','complete'].includes(cell.status);
+  byId('run').disabled=cell.stopLatched||(cell.accessOpen&&!cell.operatorAccess)||['held','complete'].includes(cell.status);
   byId('mode').disabled=byId('fault').disabled=byId('guided').disabled=cell.status!=='ready'||cell.stopLatched;
   if(rendered!==cell.history.length) {
     rendered=cell.history.length;

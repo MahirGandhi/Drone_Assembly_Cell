@@ -19,38 +19,35 @@ test('both handling routes transfer exactly one frame with 16 distinct accepted 
   }
 });
 
-test('guidance requires explicit authorization and command completes only following elapsed time',()=>{
+test('guided work requires stopped access, entry, confirmation and exit before automatic work',()=>{
   const cell=new Cell({guided:true});
-  cell.start();
+  cell.start();cell.tick(10);
   assert.equal(cell.status,'waiting');
-  cell.tick(20);
+  assert.equal(cell.op.key,'enter');
+  assert.equal(cell.accessOpen,false);
+  cell.confirm();cell.tick(10);
   assert.equal(cell.status,'waiting');
-  assert.equal(cell.time,0);
-  cell.stop();
-  assert.equal(cell.confirm(),false);
-  cell.start();
-  assert.equal(cell.status,'waiting');
+  assert.equal(cell.op.key,'prepare');
+  assert.equal(cell.accessOpen,true);
+  assert.equal(cell.closeAccess(),false);
+  cell.confirm();cell.tick(1);
   assert.equal(cell.stock.nuts,32);
-  assert.equal(cell.confirm(),true);
-  cell.tick(1);
-  assert.equal(cell.stock.nuts,32);
-  cell.stop();cell.tick(50);cell.start();
-  assert.equal(cell.status,'running');
-  assert.equal(cell.confirm(),false);
-  cell.tick(7);
+  cell.stop();const time=cell.time;cell.tick(50);
+  assert.equal(cell.time,time);
+  cell.start();cell.tick(7);
   assert.equal(cell.stock.nuts,16);
-  assert.equal(cell.history.filter(e=>e.type==='command' && e.text==='Load retained nuts').length,1);
-  cell.tick(20);
-  assert.equal(cell.op.key,'wire');
+  assert.equal(cell.op.key,'exit');
   assert.equal(cell.status,'waiting');
-  assert.equal(cell.time,28);
+  cell.confirm();cell.tick(10);
+  assert.equal(cell.accessOpen,false);
+  assert.equal(cell.op.resource,'robot');
+  assert.equal(cell.status,'running'); // Robot handling proceeds before the next access block.
 });
-
 test('pause holds elapsed work, material and joint records until deliberate resume',()=>{
   const cell=new Cell();
   cell.start();
   assert.equal(cell.inFlight,true);
-  assert.equal(cell.op.key,'prepare');
+  assert.equal(cell.op.key,'park');
   const firstMove=cell.cycle.findIndex(op=>op.key==='move');
   const beforeMove=cell.cycle.slice(0,firstMove).reduce((sum,op)=>sum+op.duration,0);
   cell.tick(beforeMove+1);
@@ -99,7 +96,8 @@ test('fault holds material and requires controlled recovery and deliberate resta
 test('unload requires an available pallet, then grip confirmation before the fixture opens',()=>{
   for (const auto of [true,false]) {
     const cell=new Cell({auto});
-    const beforeUnload=cell.cycle.slice(0,-1).reduce((sum,op)=>sum+op.duration,0);
+    const unloadIndex=cell.cycle.findIndex(op=>op.key==='unload');
+    const beforeUnload=cell.cycle.slice(0,unloadIndex).reduce((sum,op)=>sum+op.duration,0);
     cell.start();cell.tick(beforeUnload+.1);
     assert.equal(cell.op.key,'unload');
     assert.equal(cell.clamped,true);
@@ -164,4 +162,28 @@ test('shift layouts carry per-cell output and choose the first configuration tha
   const estimate=compare(null,420,true)[0];
   assert.equal(estimate.nominal,low[0].nominal);
   assert.equal(estimate.shortfall,null);
+});
+
+test('automatic commands only follow exit and operator work can resume after a stop',()=>{
+  const cell=new Cell();
+  cell.start();cell.tick(5);
+  assert.equal(cell.accessOpen,true);
+  cell.emergencyStop();
+  cell.closeAccess();
+  assert.equal(cell.acknowledgeStop(),true);
+  cell.start();
+  assert.equal(cell.accessOpen,true);
+  cell.tick(1000);
+  assert.equal(cell.status,'complete');
+  let access=false;
+  for (const event of cell.history) {
+    if (event.type==='access') {
+      if (event.text.includes('permits operator')||event.text.includes('re-entry')) access=true;
+      if (event.text.includes('gate-closed')||event.text==='Gate closed') access=false;
+    }
+    if (event.type==='command') {
+      const op=cell.cycle.find(step=>step.label===event.text);
+      if (op.resource!=='operator') assert.equal(access,false,event.text);
+    }
+  }
 });
