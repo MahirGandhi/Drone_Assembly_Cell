@@ -16,7 +16,7 @@ export function initProductTour({onShowPart}) {
     view?.select(id);
     for (const [key, button] of buttons) button.setAttribute('aria-pressed', String(key === id));
     document.getElementById('product-part-name').textContent = selected.name;
-    document.getElementById('product-part-work').textContent = selected.work;
+    document.getElementById('product-part-purpose').textContent = selected.purpose;
   }
 
   for (const part of components) {
@@ -44,7 +44,7 @@ export function initProductTour({onShowPart}) {
       } catch (error) {
         console.error(error);
         view = null;
-        host.textContent = 'The model is unavailable. Select a component from the list to see its station operation.';
+        host.textContent = 'The model is unavailable. Select a component from the list to see what it does.';
         slider.disabled = true;
         document.getElementById('product-assemble').disabled = true;
         document.getElementById('product-explode').disabled = true;
