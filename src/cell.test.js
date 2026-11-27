@@ -40,6 +40,9 @@ test('guided work requires stopped access, entry, confirmation and exit before a
   assert.equal(cell.status,'waiting');
   cell.confirm();cell.tick(10);
   assert.equal(cell.accessOpen,false);
+  assert.equal(cell.op.key,'authorize');
+  assert.equal(cell.status,'waiting');
+  cell.confirm();cell.tick(2);
   assert.equal(cell.op.resource,'robot');
   assert.equal(cell.status,'running'); // Robot handling proceeds before the next access block.
 });
@@ -72,12 +75,12 @@ test('pause holds elapsed work, material and joint records until deliberate resu
 });
 
 test('fault holds material and requires controlled recovery and deliberate restart',()=>{
-  for(const fault of Object.keys(faults)){
-    const c=new Cell({fault});c.start();c.tick(1000);
+  for(const fault of Object.keys(faults)) for (const auto of [true,false]) {
+    const c=new Cell({fault,auto});c.start();c.tick(1000);
     assert.equal(c.status,'held',fault);
     assert.equal(c.output,0);
     assert.equal(c.start(),false);
-    assert.equal(c.recover(),false);
+    if (!c.accessOpen) assert.equal(c.recover(),false);
     assert.equal(c.openAccess(),true);
     assert.equal(c.recover(),true);
     assert.equal(c.start(),false);
@@ -133,7 +136,8 @@ test('emergency stop retains completed joints and requires acknowledgement plus 
 });
 
 test('capacity respects exact horizon, contention, infeasible demand and fixed seeds',()=>{
-  const seconds=makeCycle(true).reduce((s,o)=>s+o.duration,0);
+  const cycle=makeCycle(true);
+  const seconds=cycle.slice(0,cycle.findIndex(op=>op.key==='unload')+1).reduce((s,o)=>s+o.duration,0);
   assert.equal(simulateShift({cells:1,operators:1,seconds:seconds-.1,auto:true,seed:17,variation:0}).good,0);
   const low=compare(1,420,true);
   assert.equal(low[0].shortfall,0);

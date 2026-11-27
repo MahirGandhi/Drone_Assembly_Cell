@@ -49,6 +49,22 @@
           <button type="submit" value="target">Find layout</button>
         </div>
       </form>
+      <details class="production-inputs"><summary>Material supply and quality assumptions</summary>
+        <div id="production-fields" class="shift-fields">
+          <label>Kits per delivery<input id="kitCapacity" type="number" min="1" max="12" value="2" required></label>
+          <label>Delivery interval (s)<input id="deliveryInterval" type="number" min="0" max="3600" value="0" required></label>
+          <label>Output pallet capacity<input id="outputCapacity" type="number" min="1" max="12" value="2" required></label>
+          <label>Output collection interval (s)<input id="pickupInterval" type="number" min="0" max="3600" value="0" required></label>
+          <label>Frames needing rework (%)<input id="reworkPercent" type="number" min="0" max="100" value="0" required></label>
+          <label>Repair and recheck (s)<input id="reworkSeconds" type="number" min="1" max="3600" value="60" required></label>
+        </div>
+        <p>Each cell starts with one delivery and an empty pallet. Zero interval requests operator service when empty or full. Positive intervals represent scheduled external logistics. Rework assumptions recover every affected frame after repair and recheck.</p>
+      </details>
+      <div class="shift-playback" id="shift-playback" hidden>
+        <button id="shift-play" type="button">Play shift</button>
+        <label>Shift time<input id="shift-time" type="range" min="0" max="25200" step="1" value="0"></label>
+        <output id="shift-clock">0.0 min</output>
+      </div>
     </section>
     <details class="supply-controls" id="supply-study">
       <summary>Supply-bin placement study</summary>

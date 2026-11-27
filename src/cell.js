@@ -45,7 +45,8 @@ export function makeCycle(auto) {
     route.push(step);
     if (step.resource==='operator' && operations[index+1]?.resource!=='operator') {
       route.push(task('exit','Operator exits and closes access',2,'operator'),
-        task('resetAccess','Verify access reset before automatic work',1,'fixture'));
+        task('resetAccess','Verify access reset before automatic work',1,'fixture'),
+        task('authorize','Authorize automatic restart after access reset',1,'authorization'));
     }
   }
   return route;
@@ -78,13 +79,14 @@ export class Cell {
     this.inFlight=false;
     this.accessOpen=false;
     this.operatorAccess=false;
+    this.recoveryNeedsClosure=false;
     this.stopLatched=false;
     this.held=null;
     this.screw=null;
   }
   get op() {return this.cycle[this.index];}
   get canStart() {
-    return ['ready','paused'].includes(this.status) && !this.stopLatched &&
+    return ['ready','paused'].includes(this.status) && !this.stopLatched && !this.recoveryNeedsClosure &&
       (!this.accessOpen || (this.operatorAccess && this.op?.resource==='operator'));
   }
   log(type, text, details={}) {
@@ -99,6 +101,7 @@ export class Cell {
   closeAccess() {
     if (!this.accessOpen || (this.operatorAccess && ['running','waiting'].includes(this.status))) return false;
     this.accessOpen=false;
+    this.recoveryNeedsClosure=false;
     this.log('access','Gate closed');
   }
   start() {
@@ -131,7 +134,7 @@ export class Cell {
     return true;
   }
   confirm() {
-    if (this.status!=='waiting' || this.stopLatched || (this.accessOpen && !this.operatorAccess)) return false;
+    if (this.status!=='waiting' || this.stopLatched || this.recoveryNeedsClosure || (this.accessOpen && !this.operatorAccess)) return false;
     this.status='running';
     this.log('operator','Operator authorized '+this.op.label.toLowerCase());
     return this.issue();
@@ -170,7 +173,7 @@ export class Cell {
     if (!Number.isFinite(dt) || dt<0) throw new RangeError('Invalid time increment');
     while (this.status==='running') {
       if (!this.inFlight) {
-        if (this.guided && this.op.resource==='operator') {
+        if (this.guided && ['operator','authorization'].includes(this.op.resource)) {
           this.status='waiting';
           this.log('wait',this.op.label);
           return;
@@ -196,7 +199,6 @@ export class Cell {
       this.index++;
       if (!this.op) {
         this.status='complete';
-        this.log('accepted','Frame transferred to accepted output');
         return;
       }
     }
@@ -255,6 +257,7 @@ export class Cell {
       else {
         for (const p of parts) this.parts[p]='output';
         this.output++;
+        this.log('accepted','Frame transferred to accepted output');
       }
     }
     if (error) {this.trip(error);return false;}
@@ -284,6 +287,7 @@ export class Cell {
       this.index=this.cycle.findIndex(o=>o.key==='pick' && o.joint===this.held.joint);
       this.log('rework','Discard rejected screw and restart this joint');
     }
+    this.recoveryNeedsClosure=true;
     this.log('recovery','Operator confirmed corrective action. Close gate and restart.');
     if (this.op?.resource==='operator' && this.op.key!=='enter' && !this.operatorAccess) {
       this.index=this.cycle.findLastIndex((step,index)=>index<this.index && step.key==='enter');

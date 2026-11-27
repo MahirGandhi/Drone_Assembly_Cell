@@ -1,7 +1,7 @@
 import './style.css';
 import {Cell,faults} from './cell.js';
 import {createView} from './scene.js';
-import {chooseLayout,compare,configurations} from './capacity.js';
+import {chooseLayout,compare,configurations,productionDefaults} from './capacity.js';
 import {initProductTour} from './product-tour.js';
 import asset from '../data/asset-manifest.json';
 import {checkSupplyPlacement,supplyPositions} from './supply-layout.js';
@@ -27,9 +27,12 @@ let speed=Number(byId('speed').value);
 let rendered=0;
 let lastRefresh=0;
 let activePlan;
+let shiftPlaying=false;
+let shiftTime=0;
+let shiftLast;
 let cameraKey='top';
 let liveCamera='top';
-const resources={operator:'Operator',robot:'Robot',fixture:'Fixture',inspection:'Inspection'};
+const resources={operator:'Operator',robot:'Robot',fixture:'Fixture',inspection:'Inspection',authorization:'Operator restart'};
 function reset() {
   cell=new Cell({auto:byId('mode').value==='auto',fault:byId('fault').value,guided:byId('guided').checked});
   lastTick=performance.now();
@@ -55,24 +58,23 @@ function refresh() {
   byId('confirm').hidden=cell.status!=='waiting';
   byId('confirm').disabled=cell.stopLatched;
   if (cell.status==='waiting') byId('confirm').textContent='Confirm: '+op.label;
-  byId('recovery').hidden=cell.status!=='held'&&(!cell.accessOpen||cell.operatorAccess)&&!cell.stopLatched;
+  byId('recovery').hidden=cell.status!=='held'&&(!cell.accessOpen||cell.operatorAccess)&&!cell.stopLatched&&!cell.recoveryNeedsClosure;
   byId('reason').textContent=cell.held?.reason??'Close the gate before restarting.';
   byId('access').textContent=cell.accessOpen?'Close gate':'Open gate';
   byId('recover').disabled=!cell.accessOpen||cell.status!=='held';
   byId('gate').dataset.state=cell.stopLatched?'emergency':cell.status;
   byId('gate').textContent=cell.stopLatched?'Emergency stop latched · Acknowledge stop to enable restart':
-    cell.accessOpen?(cell.operatorAccess?'Operator access open · automatic motion inhibited':'Gate open · motion inhibited'):
-    cell.status==='waiting'?'Select Confirm in Cell controls to begin: '+op.label:
+    cell.status==='waiting'?'Select Confirm in Cell controls to begin: '+op.label+(cell.accessOpen?' · operator access open':''):
     cell.status==='held'?'Cycle held · '+cell.held.reason:
-    cell.status==='paused'?'Paused · '+operation+' · '+cell.elapsed.toFixed(1)+' s into step':
-    cell.status==='running'?resources[op.resource]+' · '+operation+' · '+cell.elapsed.toFixed(1)+' / '+op.duration+' s':
+    cell.status==='paused'?'Paused · '+operation+' · '+cell.elapsed.toFixed(1)+' s into step'+(cell.accessOpen?' · access open':''):
+    cell.status==='running'?resources[op.resource]+' · '+operation+' · '+cell.elapsed.toFixed(1)+' / '+op.duration+' s'+(cell.accessOpen?' · automatic motion inhibited':''):
     cell.status==='complete'?'Frame at output · 16 joints accepted':'Gate closed';
   byId('run').textContent=['running','waiting'].includes(cell.status)?'Pause cycle':
     cell.status==='paused'?'Resume cycle':'Start cycle';
   byId('ack').disabled=!cell.stopLatched||cell.accessOpen;
   byId('reset').disabled=cell.stopLatched;
   byId('estop').disabled=cell.stopLatched||cell.status==='complete';
-  byId('run').disabled=cell.stopLatched||(cell.accessOpen&&!cell.operatorAccess)||['held','complete'].includes(cell.status);
+  byId('run').disabled=cell.stopLatched||cell.recoveryNeedsClosure||(cell.accessOpen&&!cell.operatorAccess)||['held','complete'].includes(cell.status);
   byId('mode').disabled=byId('fault').disabled=byId('guided').disabled=cell.status!=='ready'||cell.stopLatched;
   if(rendered!==cell.history.length) {
     rendered=cell.history.length;
@@ -186,11 +188,18 @@ function calculatePlan(request,showLayout) {
   if (!capacity.reportValidity()) return;
   const target=targetInput.value==='' ? null : Number(targetInput.value);
   const minutes=Number(byId('minutes').value);
-  const rows=compare(target,minutes,cell.auto);
+  const production=Object.fromEntries(Object.keys(productionDefaults).map(key=>[key,Number(byId(key).value)]));
+  for (const key of Object.keys(productionDefaults)) if (!byId(key).reportValidity()) return;
+  const rows=compare(target,minutes,cell.auto,production);
   const chosen=request==='target' ? chooseLayout(rows) :
     rows.find(row=>`${row.cells}:${row.operators}`===configuration.value);
   configuration.value=`${chosen.cells}:${chosen.operators}`;
   activePlan=chosen;
+  shiftPlaying=false;
+  shiftTime=0;
+  byId('shift-time').max=minutes*60;
+  byId('shift-playback').hidden=false;
+  byId('shift-play').textContent='Play shift';
   view?.setLayout(chosen);
   byId('layout-title').textContent=`${chosen.cells} assembly ${chosen.cells===1?'cell':'cells'} · ${chosen.operators} shared ${chosen.operators===1?'operator':'operators'}`;
   byId('layout-output').textContent=`${chosen.nominal} nominal good frames in ${minutes} min · ${chosen.waitingMinutes.toFixed(1)} min total cell wait for staff`;
@@ -208,12 +217,13 @@ function calculatePlan(request,showLayout) {
       : `The selected layout was ${chosen.shortfall} frames short in its lowest-output sample.`;
   const takt=target===null?'':` Required takt is <strong>${(minutes*60/target).toFixed(1)} s per good frame</strong> across the layout.`;
   byId('capacity-result').innerHTML=`<p>${message}${takt}</p>
-    <table><thead><tr><th scope="col">Cells</th><th scope="col">Operators</th><th scope="col">Good frames</th><th scope="col">Good frames/hr</th><th scope="col">Operator utilization</th><th scope="col">Cell time waiting for staff</th><th scope="col">Good frames across samples</th><th scope="col">Shortfall at low sample</th></tr></thead><tbody>${
-      rows.map(row=>`<tr aria-current="${row===chosen}"><td>${row.cells}</td><td>${row.operators}</td><td>${row.nominal}</td><td>${row.goodFramesPerHour.toFixed(1)}</td><td>${(100*row.operatorUtilization).toFixed(1)}%</td><td>${row.waitingMinutes.toFixed(1)} min</td><td>${row.min}–${row.max}</td><td>${row.shortfall??'–'}</td></tr>`).join('')
+    <table><thead><tr><th scope="col">Cells</th><th scope="col">Operators</th><th scope="col">Good frames</th><th scope="col">Good frames/hr</th><th scope="col">Operator utilization</th><th scope="col">Cell time waiting for staff</th><th scope="col">WIP</th><th scope="col">First-pass yield</th><th scope="col">Labor min/good frame</th><th scope="col">Supply wait</th><th scope="col">Blocked output</th><th scope="col">Good frames across samples</th><th scope="col">Shortfall at low sample</th></tr></thead><tbody>${
+      rows.map(row=>`<tr aria-current="${row===chosen}"><td>${row.cells}</td><td>${row.operators}</td><td>${row.nominal}</td><td>${row.goodFramesPerHour.toFixed(1)}</td><td>${(100*row.operatorUtilization).toFixed(1)}%</td><td>${row.waitingMinutes.toFixed(1)} min</td><td>${row.wip}</td><td>${row.firstPassYield===null?'–':(row.firstPassYield*100).toFixed(1)+'%'}</td><td>${row.laborMinutesPerGood===null?'–':row.laborMinutesPerGood.toFixed(2)}</td><td>${row.starvedMinutes.toFixed(1)} min</td><td>${row.blockedMinutes.toFixed(1)} min</td><td>${row.min}–${row.max}</td><td>${row.shortfall??'–'}</td></tr>`).join('')
     }</tbody></table>
     <details class="kpi-method"><summary>How the shift KPIs are calculated</summary>
     <p>The model counts good frames when assembly and inspection finish and the frame reaches output. The hourly rate divides that count by available shift hours. Operator utilization divides busy time by available operator time. Cell wait adds up the time cells spend waiting for an operator. Takt divides available shift time by the good frames required.</p>
-    <p>The table shows the nominal run and the range from five samples that vary assumed task times by up to 15%. The model excludes faults and assumes 20 seconds of operator time for replenishment and pallet service after every two frames per cell.</p></details>`;
+    <p>The table shows the nominal run and the range from five samples that vary assumed task times by up to 15%. Material capacities and delivery/collection intervals follow the entered assumptions. On-demand service uses 20 seconds per visit. The rework rate is a seeded scenario input, with all repairs recovering the frame. First-pass yield divides frames passing first inspection by all completed first inspections. WIP is started frames minus accepted output. Labor includes allocated service and repair time. Detailed fault scenarios remain available in the single-cell run.</p></details>`;
+  updateShiftPlayback();
   if (showLayout) {
     selectCamera('plan');
     byId('station').focus({preventScroll:true});
@@ -228,8 +238,41 @@ byId('plan').onclick=()=>{
   if (activePlan) selectCamera('plan');
   else calculatePlan('estimate',true);
 };
+function updateShiftPlayback() {
+  if (!activePlan) return;
+  byId('shift-time').value=shiftTime;
+  byId('shift-clock').textContent=(shiftTime/60).toFixed(1)+' min';
+  const states=activePlan.bays.map(bay=>{
+    const event=bay.history.find(item=>item.start<=shiftTime && item.end>shiftTime);
+    const good=bay.outputs.filter(time=>time<=shiftTime).length;
+    const status=event?.kind??'idle';
+    return {good,status,resource:event?.resource};
+  });
+  view?.setShiftState(states);
+  byId('layout-bays').replaceChildren(...states.map((state,index)=>{
+    const row=document.createElement('li');
+    row.textContent='Cell '+(index+1)+' · '+state.status.replaceAll('-',' ')+' · '+state.good+' good frames';
+    return row;
+  }));
+}
+byId('shift-play').onclick=()=>{
+  if (!activePlan) return;
+  selectCamera('plan');
+  if (shiftTime>=Number(byId('shift-time').max)) shiftTime=0;
+  shiftPlaying=!shiftPlaying;
+  shiftLast=performance.now();
+  byId('shift-play').textContent=shiftPlaying?'Pause shift':'Play shift';
+};
+byId('shift-time').oninput=()=>{
+  shiftPlaying=false;
+  byId('shift-play').textContent='Play shift';
+  shiftTime=Number(byId('shift-time').value);
+  selectCamera('plan');
+  updateShiftPlayback();
+};
 reset();
 view?.animate(cell);
+
 function advance(now) {
   if (lastTick!==undefined && !document.hidden && cell.status==='running') {
     cell.tick((now-lastTick)/1000*speed);
@@ -240,9 +283,18 @@ byId('speed').onchange=()=>{
   advance(performance.now());
   speed=Number(byId('speed').value);
 };
-document.addEventListener('visibilitychange',()=>{lastTick=performance.now();});
+document.addEventListener('visibilitychange',()=>{lastTick=performance.now();shiftLast=lastTick;});
 function frame() {
   const now=performance.now();
+  if (shiftPlaying && !document.hidden) {
+    shiftTime=Math.min(Number(byId('shift-time').max),shiftTime+(now-shiftLast)/1000*120);
+    updateShiftPlayback();
+    if (shiftTime>=Number(byId('shift-time').max)) {
+      shiftPlaying=false;
+      byId('shift-play').textContent='Play shift';
+    }
+  }
+  shiftLast=now;
   advance(now);
   if(now-lastRefresh>=100 || rendered!==cell.history.length) {
     refresh();

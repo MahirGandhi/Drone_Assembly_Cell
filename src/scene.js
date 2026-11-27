@@ -346,9 +346,11 @@ export function createView(host,onAssetStatus=()=>{}) {
     needsRender=true;
   }
 
+  const shiftIndicators=[];
   function setLayout({cells,operators,bays}) {
     if (!snapshot) return;
     layout.clear();
+    shiftIndicators.length=0;
     layoutColumns=Math.min(cells,2);
     layoutRows=Math.ceil(cells/layoutColumns);
     for (let index=0;index<cells;index++) {
@@ -357,6 +359,8 @@ export function createView(host,onAssetStatus=()=>{}) {
       const z=(Math.floor(index/layoutColumns)-(layoutRows-1)/2)*6;
       bay.position.set(x,0,z);
       layout.add(bay);
+      const status=cyl(layout,x,1.9,z,.17,.08,green.clone(),16);
+      shiftIndicators.push(status);
       label(`CELL ${index+1} · ${bays[index].good} GOOD`,x,z-2.56,layout);
     }
     // Show the shared staff once, in the access aisle.
@@ -366,6 +370,16 @@ export function createView(host,onAssetStatus=()=>{}) {
       layout.add(worker);
     }
     if (cameraMode==='plan') setCamera('plan');
+  }
+
+  function setShiftState(states) {
+    states.forEach((state,index)=>{
+      const indicator=shiftIndicators[index];
+      if (!indicator) return;
+      const waiting=['starved','blocked','staff-wait'].includes(state.status);
+      indicator.material.color.setHex(waiting?0xff725b:state.resource==='operator'?0xf4bd3b:state.status==='idle'?0x52616b:0x9deb62);
+    });
+    needsRender=true;
   }
 
   const accessBounds=new T.Box3(V(...operatorAccess.min),V(...operatorAccess.max));
@@ -514,12 +528,11 @@ export function createView(host,onAssetStatus=()=>{}) {
         if (op.key==='undock') tip.lerp(dock,f);
       }
     } else if (cell.status==='complete' && cell.auto) tip.copy(objects.top.position).add(V(0,.12,0));
-    const operatorWorking=executing && op.resource==='operator';
-    const operatorAtOutput=cell.status==='complete' && !cell.auto;
+    const operatorWorking=executing && op.resource==='operator' && !['enter','exit'].includes(op.key);
     // All gestures use modeled step progress so a pause also holds the worker's pose.
     const workPoint=V(fx,fy+.045,fz);
-    if (operatorWorking || operatorAtOutput) {
-      if (operatorAtOutput || op.key==='unload') workPoint.copy(objects.top.position);
+    if (operatorWorking) {
+      if (op.key==='unload') workPoint.copy(objects.top.position);
       else if (parts.includes(op.key)) workPoint.copy(objects[op.key].position);
       else if (op.key==='prepare') workPoint.copy(jointLocations[Math.min(15,Math.floor(f*16))]);
       else if (op.key==='wire') workPoint.copy(placement['arm'+Math.min(3,Math.floor(f*4))]);
@@ -527,10 +540,10 @@ export function createView(host,onAssetStatus=()=>{}) {
     } else operator.position.set(1.1,0,2.57);
     operator.rotation.y=Math.PI;
     for (const {sign,atShoulder,sleeve,forearm,glove} of workerArms) {
-      const reach=operatorWorking || operatorAtOutput ? .5-.5*Math.cos(2*Math.PI*(f*4+(sign+1)/4)) : 0;
+      const reach=operatorWorking ? .5-.5*Math.cos(2*Math.PI*(f*4+(sign+1)/4)) : 0;
       const atElbow=V(sign*.18,1.13+.07*reach,.05+.2*reach);
       const atHand=V(sign*.16,1.05,.12);
-      if (operatorWorking || operatorAtOutput) atHand.lerp(V(sign*.046,workPoint.y+.04,operator.position.z-workPoint.z),.4+.6*reach);
+      if (operatorWorking) atHand.lerp(V(sign*.046,workPoint.y+.04,operator.position.z-workPoint.z),.4+.6*reach);
       setLine(sleeve,atShoulder,atElbow);
       setLine(forearm,atElbow,atHand);
       glove.position.copy(atHand);
@@ -562,5 +575,5 @@ export function createView(host,onAssetStatus=()=>{}) {
     else for (const guide of guides) guide.visible=false;
     render(now,changed);
   }
-  return {animate,setCamera,setLayout,highlight,setSupplyPlacement};
+  return {animate,setCamera,setLayout,highlight,setSupplyPlacement,setShiftState};
 }
