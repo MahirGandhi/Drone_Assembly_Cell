@@ -73,8 +73,11 @@ export function createView(host,onAssetStatus=()=>{}) {
   }
   const station=new T.Group();
   const layout=new T.Group();
+  const lineLayout=new T.Group();
+  const lineMarkers=[];
+  lineLayout.visible=false;
   layout.visible=false;
-  scene.add(station,layout);
+  scene.add(station,layout,lineLayout);
   let needsRender=true;
   let lastRender=-Infinity;
   let motionDirty=false;
@@ -240,7 +243,7 @@ export function createView(host,onAssetStatus=()=>{}) {
     updateBin(bin);
     const snapshotBin=snapshot?.getObjectByName('supply-bin');
     if (snapshotBin) updateBin(snapshotBin);
-    layout.traverse(object=>{
+    for(const group of [layout,lineLayout]) group.traverse(object=>{
       if (object.name==='supply-bin') updateBin(object);
     });
     needsRender=true;
@@ -333,6 +336,7 @@ export function createView(host,onAssetStatus=()=>{}) {
     const half=Math.max(3.35,3.95/aspect);
     Object.assign(camera,{left:-half*aspect,right:half*aspect,top:half,bottom:-half});
     if (cameraMode==='plan') fitPlan();
+    if (cameraMode==='line') fitLine();
     camera.updateProjectionMatrix();
     renderer.setSize(w,h,false);
     needsRender=true;
@@ -348,10 +352,15 @@ export function createView(host,onAssetStatus=()=>{}) {
   function setCamera(next) {
     cameraMode=next;
     const planning=next==='plan';
-    station.visible=!planning;
+    const wholeLine=next==='line';
+    station.visible=!planning&&!wholeLine;
     layout.visible=planning;
+    lineLayout.visible=wholeLine;
+    ground.scale.set(wholeLine?3:1,1,wholeLine?3:1);grid.scale.setScalar(wholeLine?3:1);
     controls.target.set(next==='focus'?fx:0,next==='focus'?fy:0,next==='focus'?fz:.12);
-    if (planning) {
+    if (wholeLine) {
+      camera.position.set(0,45,1);fitLine();
+    } else if (planning) {
       camera.position.set(0,24,.001);
       fitPlan();
     } else {
@@ -366,6 +375,50 @@ export function createView(host,onAssetStatus=()=>{}) {
   }
 
   const shiftIndicators=[];
+  function fitLine() {camera.zoom=Math.min((camera.right-camera.left)/47,(camera.top-camera.bottom)/29);}
+  function setLineLayout(input) {
+    lineLayout.traverse(object=>{if(object.name==='floor-label'&&object.material?.map){object.material.map.dispose();object.material.dispose();}});
+    lineLayout.clear();lineMarkers.length=0;
+    input.stages.forEach((stage,index)=>{
+      const x=(index-2)*9,markers=[];
+      for(let unit=0;unit<stage.count;unit++) {
+        const z=(unit-(stage.count-1)/2)*6;
+        if(stage.id==='frame'&&snapshot) {
+          const frameCell=snapshot.clone();frameCell.position.set(x,0,z);lineLayout.add(frameCell);
+        } else {
+          box(lineLayout,x,.005,z,3,.01,3,mat(0x505d60),false);
+          box(lineLayout,x,.85,z,1.8,.08,1.15,table);
+          for(const dx of [-.75,.75]) for(const dz of [-.43,.43]) box(lineLayout,x+dx,.42,z+dz,.07,.84,.07,steel);
+          if(stage.id==='test') {box(lineLayout,x,.99,z-.32,.65,.2,.3,blue);box(lineLayout,x,1.32,z-.4,.5,.37,.05,dark);}
+          if(stage.id==='prepare') for(const dx of [-.55,.55]) box(lineLayout,x+dx,.97,z+.15,.3,.15,.4,blue);
+        }
+        const indicator=cyl(lineLayout,x,2,z,.2,.09,green.clone(),16);
+        const product=new T.Group();product.position.set(x,1.04,z);lineLayout.add(product);
+        box(product,0,0,0,.16,.035,.16,carbon);
+        for(const angle of [-Math.PI/4,Math.PI/4]) {const arm=box(product,0,0,0,.66,.025,.025,carbon);arm.rotation.y=angle;}
+        product.visible=false;
+        markers.push({indicator,product});
+        label(`RESOURCE ${unit+1}`,x,z+2.05,lineLayout);
+      }
+      label(['PREPARATION','FRAME ASSEMBLY','AVIONICS','BENCH CHECKS','FINAL CHECKS'][index],x,-12,lineLayout);
+      const heading=lineLayout.children.at(-1);if(webgl) heading.scale.multiplyScalar(6.5);
+      lineMarkers.push(markers);
+    });
+    for(let i=0;i<input.operators;i++) {const person=operator.clone();person.position.set((i-(input.operators-1)/2)*.9,0,13);lineLayout.add(person);}
+    label(`${input.operators} SHARED ASSEMBLY OPERATORS`,0,14.1,lineLayout);
+    if(cameraMode==='line') {fitLine();camera.updateProjectionMatrix();}
+    needsRender=true;
+  }
+  function setLineState(snapshot) {
+    snapshot.stations.forEach((stage,index)=>stage.units.forEach((unit,i)=>{
+      const marker=lineMarkers[index]?.[i];if(!marker)return;
+      const fault=['repair','repair-wait','blocked','scrap-handling'].includes(unit.state);
+      const wait=['staff-wait','planned-stop','rework'].includes(unit.state);
+      marker.indicator.material.color.setHex(fault?0xff725b:wait?0xf4bd3b:unit.state==='idle'?0x52616b:0x9deb62);
+      marker.product.visible=unit.job!==null;
+    }));
+    needsRender=true;
+  }
   function setLayout({cells,operators,bays}) {
     if (!snapshot) return;
     layout.clear();
@@ -467,7 +520,7 @@ export function createView(host,onAssetStatus=()=>{}) {
   }
 
   function animate(cell,now=performance.now()) {
-    if (cameraMode==='plan') {
+    if (cameraMode==='plan'||cameraMode==='line') {
       render(now,false);
       return;
     }
@@ -597,5 +650,5 @@ export function createView(host,onAssetStatus=()=>{}) {
     else for (const guide of guides) guide.visible=false;
     render(now,changed);
   }
-  return {animate,setCamera,setLayout,highlight,setSupplyPlacement,setShiftState};
+  return {animate,setCamera,setLayout,highlight,setSupplyPlacement,setShiftState,setLineLayout,setLineState};
 }

@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+const root=new URL('../',import.meta.url);
+const source=JSON.parse(fs.readFileSync(new URL('vendor/simscript/SOURCE.json',root)));
+for(const [file,sha] of Object.entries(source.files)) assert.equal(crypto.createHash('sha256').update(fs.readFileSync(new URL('vendor/simscript/'+file,root))).digest('hex'),sha,'Vendored runtime changed: '+file);
+const data=JSON.parse(fs.readFileSync(new URL('data/public-process-evidence.json',root)));
+assert.equal(data.doi,'10.5281/zenodo.15340717');assert.equal(data.license,'CC-BY-4.0');
+assert.equal(data.profiles.length,4);
+assert.equal(data.profiles.reduce((sum,file)=>sum+file.records,0),data.manualMultipliers.length);
+assert.ok(data.manualMultipliers.length>0&&data.manualMultipliers.every(value=>Number.isFinite(value)&&value>0));
+assert.ok(Math.abs(data.manualMultipliers.reduce((sum,value)=>sum+value,0)/data.manualMultipliers.length-1)<1e-5);
+console.log('Published scheduler runtime hashes and derived public benchmark structure verified.');

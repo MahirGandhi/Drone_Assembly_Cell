@@ -1,0 +1,60 @@
+{
+  "package": "simscript",
+  "version": "1.0.37",
+  "url": "https://registry.npmjs.org/simscript/-/simscript-1.0.37.tgz",
+  "sha512": "16af5bd17ad003f3ffca4930ed7e60715901ffdf38b5b92582d7d043564e829944b2e692140101872b97c2308387d2c96011bab1735447e5d561629168bdb0f6",
+  "upstreamPackage": {
+    "name": "simscript",
+    "version": "1.0.37",
+    "description": "A Discrete Event Simulation Library in TypeScript",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+      "/dist"
+    ],
+    "keywords": [
+      "Discrete Event Simulation",
+      "Simulation",
+      "Animation",
+      "X3DOM",
+      "A-Frame",
+      "Network"
+    ],
+    "author": "Bernardo Castilho",
+    "license": "ISC",
+    "scripts": {
+      "test": "echo \"No test specified\""
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/Bernardo-Castilho/SimScript.git"
+    },
+    "bugs": {
+      "url": "https://github.com/Bernardo-Castilho/SimScript/issues"
+    },
+    "homepage": "https://github.com/Bernardo-Castilho/SimScript#readme",
+    "dependencies": {
+      "typedoc": "^0.20.36",
+      "typescript": "^4.2.4"
+    }
+  },
+  "files": {
+    "event.js": "860d2042d2c2fa5cf697c65220ec1ad644ad8aee8e842b4f2d74797053efabe8",
+    "util.js": "587db7ec989f1059ca31756d8c81f357ac220a553a4701b1ee57b8a95fe7d055",
+    "random.js": "559abef93c4e39044de120b57233dadd871006a54a981b1d4e69a86b21ffe9db",
+    "tally.js": "922ce59061f5b4ea6b5243583f7592a8999a15f0441c457b13ba4ee2bb404f69",
+    "queue.js": "b5a14ddbbae828d19aa25647c20f1124d209e33abda5fa818956f8c65658a337",
+    "entity.js": "ca5a863de59307cc3fa22a9044ea4ccc25255f6adb60f1eab134535a59670a9c",
+    "simulation.js": "d206e6c4f09cb13668bac9067e994beffbd2b85df35452b28fb2b5ad2a4fd4f0"
+  },
+  "originalFiles": {
+    "event.js": "25f56665d841faab4c72406355d6bb602a86968f41627b4f75ea7caf0910c895",
+    "util.js": "d347c0584704c1ff1c7e4891ab73d5d0b752d86708a7253a4a4c1b7583810e1a",
+    "random.js": "c693463a6e08ef51be1cafb091e2a292141c35626aa4b7f6f487f28b616347e2",
+    "tally.js": "13a1f73d5be16b31f33f0cb023ffd0afedfd16504f7db202da3531810af4162a",
+    "queue.js": "4b5d4d6160993d7133e9a6b5910fe01b9fa87a847eab4b6acc02881e751a459f",
+    "entity.js": "33003cadf183db9914bab298a52f425f03979f2ab012ca009a8d57916b5794fd",
+    "simulation.js": "92c99809f717abb5e23f10f2ef405d77a1eb92cd253be86d2cf1bfc6802d43ab"
+  },
+  "normalization": "CRLF to LF only; runtime logic unchanged"
+}

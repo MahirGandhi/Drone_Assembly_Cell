@@ -1,0 +1,9 @@
+{
+  "name": "simscript-runtime",
+  "version": "1.0.37",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.js",
+  "license": "ISC",
+  "description": "Unmodified published runtime subset; see SOURCE.json."
+}

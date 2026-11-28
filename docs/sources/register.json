@@ -67,6 +67,42 @@
       "limits": [
         "Project uses separate scoped reviewers plus evidence checks; paper is not proof that any reviewer conclusion is correct."
       ]
+    },
+    {
+      "id": "SIMSCRIPT-RUNTIME",
+      "url": "https://github.com/Bernardo-Castilho/SimScript",
+      "kind": "published software",
+      "revision_status": "npm 1.0.37; archive and runtime hashes in vendor/simscript/SOURCE.json",
+      "facts": [
+        "Event calendar and finite-capacity resources reused."
+      ],
+      "limits": [
+        "Domain rules, physical correctness and input evidence remain application responsibilities."
+      ]
+    },
+    {
+      "id": "AI-PRISM-DURATIONS",
+      "url": "https://zenodo.org/records/15340717",
+      "kind": "public measured benchmark",
+      "revision_status": "version 1; four manual-workstation files checked against published MD5 and recorded SHA256",
+      "facts": [
+        "913 positive within-row manual appliance-test intervals imported; normalized by file mean; CC-BY-4.0."
+      ],
+      "limits": [
+        "Optional analog variability only. Not drone times, defect rates or equipment reliability; serial dependence is not preserved."
+      ]
+    },
+    {
+      "id": "NIST-WILSON",
+      "url": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "kind": "statistical method",
+      "revision_status": "Wilson formula checked for conditional target-attainment intervals",
+      "facts": [
+        "Binomial proportion interval formula."
+      ],
+      "limits": [
+        "Simulation sampling conditional on model inputs; does not establish factory accuracy."
+      ]
     }
   ]
 }

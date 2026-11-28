@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Explore the X500 drone, follow frame assembly and compare manufacturing capacity, staffing and production losses."><title>X500 · Assembly Engineering</title></head>
-<body>
+<body data-workspace="cell">
 <header>
   <div class="brand"><span class="logo" aria-hidden="true">✣</span><div><strong>X500</strong><small>Assembly engineering</small></div></div>
   <div class="header-tools">
@@ -15,10 +15,11 @@
   <nav class="project-path" aria-label="Explore the project">
     <button type="button" data-open-product><span>01 · PRODUCT</span><strong>Understand the assembly</strong><small>Explode the drone and identify each part.</small></button>
     <a href="#station-controls"><span>02 · PROCESS</span><strong>Watch one frame being built</strong><small>Follow the work, checks and recovery.</small></a>
-    <a href="#shift-title"><span>03 · PRODUCTION</span><strong>Change the production plan</strong><small>Compare output, labor and lost time.</small></a>
+    <a href="#line-study"><span>03 · PRODUCTION</span><strong>Change the production plan</strong><small>Compare output, labor and lost time.</small></a>
   </nav>
 </section>
 <main>
+  <nav class="workspace-tabs" aria-label="Manufacturing workspace"><button id="workspace-cell" type="button" aria-pressed="true">Frame cell</button><button id="workspace-line" type="button" aria-pressed="false">Assembly line</button></nav>
   <section class="controls" id="station-controls" aria-label="Station controls">
     <div class="cycle-controls">
       <div class="section-title">
@@ -45,7 +46,7 @@
       </div>
     </div>
     <section class="shift-controls" aria-labelledby="shift-title">
-      <h2 id="shift-title">Shift planning</h2>
+      <h2 id="shift-title">Frame-cell capacity</h2>
       <form id="capacity" novalidate>
         <div class="shift-fields">
           <label>Required good frames<input id="target" type="number" min="1" max="2000" value="105"></label>
@@ -75,6 +76,25 @@
         <output id="shift-clock">0.0 min</output>
       </div>
     </section>
+    <section class="line-study" id="line-study" aria-labelledby="line-title">
+      <div class="line-heading"><div><p class="eyebrow">DESIGN THE ASSEMBLY LINE</p><h2 id="line-title">From incoming parts to inspected assembly</h2><p>Change the workstations, staffing or operating conditions. The same schedule drives the results and the visual line.</p></div><span class="evidence-tag">Planning model · uncalibrated</span></div>
+      <form id="line-form">
+        <div class="line-primary-fields">
+          <label>Required assemblies<input name="target" type="number" min="1" max="2000" value="105" required></label>
+          <label>Production window (min)<input name="minutes" type="number" min="1" max="720" value="420" required></label>
+          <label>Shared operators<input name="operators" type="number" min="1" max="6" value="3" required></label>
+          <label>Frame handling<select name="auto"><option value="true">Robot assisted</option><option value="false">Operator loaded</option></select></label>
+          <label>Timing scenario<select name="timingProfile"><option value="assumed">Entered task times</option><option value="public-manual">Public manual-work variation</option></select></label>
+        </div>
+        <details class="line-details line-advanced"><summary>Station parameters, operating losses and design priorities</summary><details class="line-details"><summary>Workstations, quality and equipment costs</summary><div class="table-scroll"><table class="line-station-inputs"><caption>Parallel resources share the operator pool. Operator touch is included in the cycle time.</caption><thead><tr><th scope="col">Workstation</th><th scope="col">Resources</th><th scope="col">Cycle (s)</th><th scope="col">Operator touch (s)</th><th scope="col">First-pass failures (%)</th><th scope="col">Footprint / resource (m²)</th><th scope="col">Installed cost / resource ($)</th></tr></thead><tbody id="line-station-fields"></tbody></table></div><p>Times, failure rates and footprints are editable design assumptions. Zero cost means unpriced. Frame-cell times preserve its access and fastening sequence. Other stations use operator work followed by unattended processing.</p></details>
+        <details class="line-details"><summary>Downtime, rework, material flow and scheduled stops</summary><div class="line-extended-fields" id="line-loss-fields"></div><p>MTBF uses accumulated processing time. Failed equipment waits for a shared technician, then resumes its remaining work. Failed quality checks enter bounded repair-and-recheck attempts; unsuccessful assemblies are scrapped. A scheduled pause stops processing while work waits in place.</p><button type="button" id="line-loss-example">Load an example with production losses</button></details>
+        <details class="line-details"><summary>Design priorities and limits</summary><div class="line-extended-fields" id="line-objective-fields"></div><p>Demand is the first constraint. Weights rank equipment or priced capital, operator count and equipment footprint among the evaluated feasible designs. Unpriced equipment uses resource count as a proxy. This bounded search does not prove a global optimum or include installation economics, aisles or qualified safety spacing.</p></details></details>
+        <div class="actions"><button class="primary" type="submit" value="run">Run this line</button><button type="submit" value="search">Find a feasible design</button><button type="button" id="line-export" disabled>Export line study</button><span id="line-calculating" role="status"></span></div>
+      </form>
+      <p id="line-error" role="alert" hidden></p>
+      <div class="line-playback" id="line-playback" hidden><button type="button" id="line-play">Play line</button><label>Line time<input id="line-time" type="range" min="0" max="25200" value="0" step="1"></label><output id="line-clock">0.0 min</output><p id="line-live-counts"></p></div>
+
+    </section>
     <details class="engineering-status">
       <summary>Fixture and assembly evidence</summary>
       <p>The prepared lower assembly includes mounting rails, landing gear, a battery deck and power-board envelopes. Sixteen joint axes come from the reference STEP. The fixture, clamps and tool remain concepts.</p>
@@ -100,6 +120,7 @@
         <button id="iso" aria-pressed="false">Isometric</button>
         <button id="focus" aria-pressed="false">Fixture</button>
         <button id="plan" aria-pressed="false">Shift layout</button>
+        <button id="line-camera" aria-pressed="false">Whole line</button>
       </div>
     </div>
     <div class="viewport">
@@ -107,6 +128,7 @@
       <div class="station-bottom">
         <div id="part-guide" hidden><div><strong id="guide-part"></strong><p id="guide-operation"></p></div><button id="clear-guide" type="button" aria-label="Clear component highlight">×</button></div>
         <div id="shift-layout-details" class="shift-layout-details" hidden><strong id="layout-title"></strong><p id="layout-output"></p><ol id="layout-bays" aria-label="Modeled output by cell"></ol></div>
+        <div id="line-scene-details" class="shift-layout-details" hidden><strong>Assembly line · resource layout</strong><p id="line-scene-counts"></p><p>Green: working · amber: operator or scheduled wait · red: repair or blocked · gray: awaiting input</p><p>Concept layout. Equipment geometry and safety clearances remain unqualified.</p></div>
         <div id="asset-status" class="asset-status" role="status">Loading supply crate…</div>
         <div id="gate" class="gate">Gate closed</div>
         <div class="legend" id="station-legend"><span><i></i> Cell boundary</span><span><i></i> Joint accepted</span><span><i></i> Joint pending</span><span><i></i> Active work</span></div>
@@ -114,7 +136,7 @@
     </div>
   </section>
 
-  <aside class="panel" aria-label="Run monitor">
+  <aside class="panel cell-monitor" aria-label="Run monitor">
     <div class="operation"><small>ACTIVE OPERATION</small><strong id="op">Ready to start</strong><div class="progress"><div id="bar"></div></div></div>
     <div class="metrics">
       <div><small>SIMULATED CYCLE TIME</small><strong id="time">0.0 s</strong></div>
@@ -125,7 +147,10 @@
     </div>
     <div class="logs"><h2>Event log</h2><ol id="events"><li>Waiting for cycle start.</li></ol></div>
   </aside>
+  <aside class="panel line-monitor" id="line-monitor" aria-label="Live assembly line monitor"></aside>
   <section class="capacity-results" aria-labelledby="results-title"><h2 id="results-title">Shift planning results</h2><div id="capacity-result" aria-live="polite"></div></section>
+  <section class="line-summary-panel"><div id="line-results" aria-live="polite"></div>      <details class="line-details"><summary>Engineering basis and data sources</summary><div id="line-requirements"></div><p>The frame sequence follows the X500 reference assembly. The extended route is a proposed manufacturing design; its timings and quality limits have not been physically qualified. Bench completion does not establish flight qualification.</p><p><a href="https://zenodo.org/records/15340717" target="_blank" rel="noreferrer">AI-PRISM assembly-duration dataset</a> supplies the optional normalized manual-work samples. It concerns appliance testing, so transferring its variability is an explicit analog assumption. Raw drone times and reliability are not supplied by that dataset.</p><p>Scheduling reuses <a href="https://github.com/Bernardo-Castilho/SimScript" target="_blank" rel="noreferrer">SimScript</a>. Downtime and shared-repair behavior follow the resource-and-interruption approach documented in <a href="https://simpy.readthedocs.io/en/stable/examples/machine_shop.html" target="_blank" rel="noreferrer">SimPy's machine-shop example</a>. Failure and repair parameters remain scenario inputs.</p></details></section>
+  <section class="capacity-results" id="line-analysis" aria-label="Assembly line performance"></section>
 </main>
 <dialog class="about-station" id="about-station" aria-labelledby="about-title">
   <div class="about-heading">
@@ -134,7 +159,8 @@
   </div>
   <p>I built this simulation to work through how an X500 drone frame goes together and how many frames a team could finish in a shift.</p>
   <p><strong>Explore components</strong> shows what each part does and where it enters the station. <strong>Start cycle</strong> runs one frame through loading, wire routing, fastening and inspection. Try a fault to see what stops the cell and what it takes to restart.</p>
-  <p><strong>Shift planning</strong> compares cell layouts and staffing against a production target. It shows output and time spent waiting for an operator. Task times are assumptions, and shift estimates exclude faults.</p>
+  <p><strong>Frame-cell capacity</strong> compares duplicate cells. <strong>Assembly line</strong> connects preparation, frame assembly, avionics, bench checks and final inspection. Change task times, staffing, parallel resources, downtime, rework and material flow to compare production designs.</p>
+  <p>Product characteristics define the required checks. The scheduling model predicts consequences under the entered assumptions. Public benchmark data is identified separately; factory performance and physical equipment remain unvalidated.</p>
 </dialog>
 <dialog class="product-tour" id="product-tour" aria-labelledby="product-tour-title">
 <div class="product-tour-heading"><div><p class="eyebrow">01 · UNDERSTAND THE PRODUCT</p><h2 id="product-tour-title">One assembly. A purpose for every part.</h2><p>X500 V2-inspired geometry · Select a part to see what it does.</p></div><form method="dialog"><button aria-label="Close component introduction">Close</button></form></div>
@@ -145,6 +171,6 @@
 <div class="product-tour-selection" aria-live="polite"><h3 id="product-part-name"></h3><p id="product-part-purpose"></p></div>
 </div></div>
 <div class="product-tour-controls"><label for="product-explosion">Explode <output id="product-spread" for="product-explosion">80%</output></label><input id="product-explosion" type="range" min="0" max="100" value="80"><button id="product-assemble" type="button">Assemble</button><button id="product-explode" type="button">Explode fully</button></div>
-<div class="product-tour-footer"><p id="product-process-context"></p><button class="primary" id="product-to-station" type="button">Follow into assembly →</button></div>
+<div class="product-tour-footer"><p id="product-process-context"></p><button class="primary" id="product-to-station" type="button">Follow into assembly</button></div>
 </dialog>
 <script type="module" src="/src/main.js"></script></body></html>

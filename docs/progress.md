@@ -1,5 +1,11 @@
 # Execution status
 
+## Assembly-line extension
+
+The user authorized the line-planning extension. The frame-cell boundary remains intact within the proposed route. SimScript supplies scheduling; checksummed public assembly data supplies an optional analog variability scenario. Editable station resources, timing, staffing, footprint/cost inputs, finite buffers, supply/output cadence, shared maintenance, downtime, scheduled pauses, rework and scrap are implemented. Bounded demand search changes individual station resources and the visual layout. See [semantics and limits](engineering/line-model.md).
+
+The entry view retains the manufacturing station. Product/process/production routes have distinct outcomes; component functions remain brief and separate from process context. The underlying data and physical qualification limits remain explicit.
+
 Repository: MahirGandhi/Drone_Assembly_Cell. User authorized execution on 2026-11-25.
 
 A browser prototype covering S0–S8 is implemented. The remaining physical verification tasks stay open. See [prototype coverage](engineering/virtual-prototype.md) and [independent review](reviews/virtual-prototype.md).

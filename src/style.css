@@ -1,9 +1,9 @@
-:root { font: 15px system-ui, sans-serif; color: #e7eaed; background: #101318; color-scheme: dark; }
+:root { font: 16px system-ui, sans-serif; color: #e7eaed; background: #101318; color-scheme: dark; }
 * { box-sizing: border-box; }
 body, h1, h2, p { margin: 0; }
 h1 { font-size: 18px; }
 h2 { font-size: 17px; }
-small { display: block; color: #aab7c4; font-size: 10px; letter-spacing: .09em; }
+small { display: block; color: #aab7c4; font-size: 12px; letter-spacing: .06em; }
 header { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 25px; border-bottom: 1px solid #2a323d; background: #151a22; }
 .brand { display: flex; gap: 13px; align-items: center; }
 .brand strong { font-size: 19px; }
@@ -25,12 +25,12 @@ main {
   border-radius: 10px;
 }
 button, select, input { font: inherit; color: inherit; background: #242c38; border: 1px solid #465161; border-radius: 5px; padding: 7px 10px; }
-button { cursor: pointer; font-size: 13px; font-weight: 650; }
+button { cursor: pointer; font-size: 14px; font-weight: 650; }
 button:hover:not(:disabled) { border-color: #d0eea0; }
 button[aria-pressed=true] { border-color: #c8ef90; color: #d1f790; }
 button:disabled { opacity: .45; cursor: default; }
 .primary { background: #c4ec8b; border-color: #c4ec8b; color: #161e17; }
-label { display: grid; gap: 5px; font-size: 12px; color: #bfccd9; }
+label { display: grid; gap: 5px; font-size: 14px; color: #bfccd9; }
 
 html { scroll-behavior: smooth; scroll-padding-top: 14px; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #c4ec8b; outline-offset: 3px; }

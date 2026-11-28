@@ -66,7 +66,7 @@ export function createProductView(host, onSelect) {
   const controls = new OrbitControls(camera,renderer.domElement);
   controls.enableDamping = webgl;
   controls.minZoom = .85;
-  controls.maxZoom = 4;
+  controls.maxZoom = 8;
   let hostVisible = true;
   let selected = null;
   let isolated = false;
@@ -229,6 +229,7 @@ export function createProductView(host, onSelect) {
     Object.assign(camera,{left:-half*aspect,right:half*aspect,top:half,bottom:-half});
     camera.updateProjectionMatrix();
     renderer.setSize(width,height,false);
+    if(isolated) frameSelection();
     needsRender = true;
   }
 
@@ -238,6 +239,7 @@ export function createProductView(host, onSelect) {
     camera.zoom = 1;
     camera.updateProjectionMatrix();
     controls.update();
+    if(isolated) frameSelection();
   }
 
   function select(id) {
@@ -251,7 +253,20 @@ export function createProductView(host, onSelect) {
   function updateIsolation() {
     for(const {group} of objects) group.visible=!isolated||group.children.some(child=>child.userData.partId===selected);
     aids.visible=!isolated&&amount>.07;
+    if(isolated) frameSelection();
     needsRender=true;
+  }
+
+  function frameSelection() {
+    const bounds=new THREE.Box3();
+    for(const {group} of objects) if(group.visible) bounds.expandByObject(group);
+    if(bounds.isEmpty()) return;
+    const center=bounds.getCenter(new THREE.Vector3()),size=bounds.getSize(new THREE.Vector3());
+    const offset=camera.position.clone().sub(controls.target);
+    controls.target.copy(center);camera.position.copy(center).add(offset);
+    const diameter=Math.max(size.x,size.y,size.z,.025);
+    camera.zoom=Math.min(8,Math.max(.85,Math.min(camera.right-camera.left,camera.top-camera.bottom)/(diameter*1.65)));
+    camera.updateProjectionMatrix();controls.update();needsRender=true;
   }
 
   const ray = new THREE.Raycaster();
@@ -289,6 +304,7 @@ export function createProductView(host, onSelect) {
       for (const {group,position,offset} of objects) group.position.copy(position).addScaledVector(offset,amount);
       aids.visible = !isolated&&amount>.07;
       for (const guide of guides) updateGuide(guide);
+      if(isolated) frameSelection();
       needsRender = true;
     }
     controls.update();
@@ -314,5 +330,5 @@ export function createProductView(host, onSelect) {
   fit();
   setCamera('iso');
   animation = requestAnimationFrame(render);
-  return {setCamera,select,setVisible,setIsolation(value) {isolated=value;updateIsolation();},setExplosion(value) { targetAmount = value; }};
+  return {setCamera,select,setVisible,setIsolation(value) {isolated=value;updateIsolation();if(!value)setCamera('iso');},setExplosion(value) { targetAmount = value; }};
 }

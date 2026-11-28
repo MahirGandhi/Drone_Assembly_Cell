@@ -5,11 +5,13 @@ import {chooseLayout,compare,configurations,productionDefaults} from './capacity
 import {initProductTour} from './product-tour.js';
 import asset from '../data/asset-manifest.json';
 import {checkSupplyPlacement,supplyPositions} from './supply-layout.js';
+import {initLineStudy} from './line-study.js';
 
 const byId=id=>document.getElementById(id);
 byId('open-about').addEventListener('click', () => byId('about-station').showModal());
 for(const [key,[label]] of Object.entries(faults)) byId('fault').add(new Option(label,key));
 let view;
+let lineStudy;
 let supplyAssetLoaded=false;
 try {view=createView(byId('scene'),(message,loaded=false)=>{
   supplyAssetLoaded=loaded;
@@ -120,24 +122,31 @@ byId('access').onclick=()=>{
   refresh();
 };
 byId('recover').onclick=()=>{cell.recover();refresh();};
-const cameraNames={top:'Overhead',iso:'Isometric',focus:'Fixture close-up',plan:'Shift layout'};
+const cameraNames={top:'Overhead',iso:'Isometric',focus:'Fixture close-up',plan:'Shift layout',line:'Assembly line'};
 function selectCamera(key) {
+  const wholeLine=key==='line';
+  document.body.dataset.workspace=wholeLine?'line':'cell';
+  byId('workspace-cell').setAttribute('aria-pressed',String(!wholeLine));
+  byId('workspace-line').setAttribute('aria-pressed',String(wholeLine));
+  if(!wholeLine) lineStudy?.pause();
+  else if(['running','waiting'].includes(cell.status)) {cell.stop();refresh();}
   if (key!=='plan') {
     shiftPlaying=false;
     byId('shift-play').textContent='Play shift';
   }
   cameraKey=key;
-  if (key!=='plan') liveCamera=key;
+  if (!['plan','line'].includes(key)) liveCamera=key;
   view?.setCamera(key);
   byId('camera-label').textContent=cameraNames[key];
   for (const name of Object.keys(cameraNames)) {
-    byId(name).setAttribute('aria-pressed',String(name===key));
+    byId(name==='line'?'line-camera':name).setAttribute('aria-pressed',String(name===key));
   }
   const planning=key==='plan';
   byId('shift-layout-details').hidden=!planning;
-  byId('station-legend').hidden=planning;
-  byId('gate').hidden=planning;
-  byId('part-guide').hidden=planning || !byId('guide-part').textContent;
+  byId('line-scene-details').hidden=!wholeLine;
+  byId('station-legend').hidden=planning||wholeLine;
+  byId('gate').hidden=planning||wholeLine;
+  byId('part-guide').hidden=planning||wholeLine || !byId('guide-part').textContent;
 }
 for (const key of ['top','iso','focus']) byId(key).onclick=()=>selectCamera(key);
 
@@ -303,6 +312,7 @@ byId('speed').onchange=()=>{
 document.addEventListener('visibilitychange',()=>{lastTick=performance.now();shiftLast=lastTick;});
 function frame() {
   const now=performance.now();
+  lineStudy?.tick(now);
   if (shiftPlaying && !document.hidden) {
     shiftTime=Math.min(Number(byId('shift-time').max),shiftTime+(now-shiftLast)/1000*120);
     updateShiftPlayback();
@@ -321,3 +331,10 @@ function frame() {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+lineStudy=initLineStudy({onLayout:study=>view?.setLineLayout(study.input),onState:state=>view?.setLineState(state),onFocus:()=>selectCamera('line')});
+byId('workspace-cell').onclick=()=>selectCamera(liveCamera);
+byId('workspace-line').onclick=byId('line-camera').onclick=()=>lineStudy.focus();
+document.querySelector('a[href="#line-study"]').onclick=event=>{event.preventDefault();lineStudy.focus();byId('line-study').scrollIntoView({block:'start'});};
+document.querySelector('a[href="#station-controls"]').addEventListener('click',()=>selectCamera(liveCamera));
+lineStudy.calculate(false,false);
